@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
-const fs = require('fs');
 require('dotenv').config();
 
 const contactRoutes = require('./routes/contactRoutes');
@@ -15,14 +14,18 @@ const PORT = process.env.PORT || 5000;
 
 // CORS setup
 const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:5173',
+  process.env.CLIENT_URL,
+  'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173'
-];
+].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+    // Allow same-origin requests (no origin header), allowed origins, or *.onrender.com
+    if (!origin || allowedOrigins.includes(origin) || (origin && origin.endsWith('.onrender.com'))) {
+      callback(null, true);
+    } else if (process.env.NODE_ENV !== 'production') {
       callback(null, true);
     } else {
       callback(new Error('CORS policy violation'));
@@ -61,33 +64,18 @@ app.use('/api/products', productRoutes);
 app.use('/api/team', teamRoutes);
 
 // Serve static client build in production
-const clientBuildPath = path.resolve(__dirname, '..', 'client', 'dist');
-const indexHtmlPath = path.join(clientBuildPath, 'index.html');
-
-if (fs.existsSync(clientBuildPath)) {
-  console.log(`[Static] Serving client build from: ${clientBuildPath}`);
-  app.use(express.static(clientBuildPath));
-
-  // Client-side routing catch-all
-  app.get('*', (req, res) => {
-    res.sendFile(indexHtmlPath, (err) => {
-      if (err) {
-        console.error('[Static] Error sending index.html:', err.message);
-        res.status(500).send('Application loading error. Please try again.');
-      }
-    });
-  });
-} else {
-  console.warn(`[Static] Client build not found at: ${clientBuildPath}`);
-  app.get('*', (req, res) => {
-    res.status(503).json({ error: 'Client build not available. Run npm run render-build first.' });
-  });
-}
+const clientBuildPath = path.join(__dirname, '..', 'client', 'dist');
+app.use(express.static(clientBuildPath));
 
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error('Global Error Handler:', err.stack);
   res.status(500).json({ success: false, error: 'Internal Server Error' });
+});
+
+// Client-side routing catch-all (must be after API routes and error handler)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
 // MongoDB Connection
@@ -106,7 +94,6 @@ app.listen(PORT, () => {
   console.log(`🚀 Denesens Solutions Server running on port ${PORT}`);
   console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📂 Client build: ${fs.existsSync(clientBuildPath) ? 'FOUND' : 'NOT FOUND'}`);
   console.log(`====================================================`);
 });
 
