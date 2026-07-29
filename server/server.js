@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const contactRoutes = require('./routes/contactRoutes');
@@ -60,18 +61,33 @@ app.use('/api/products', productRoutes);
 app.use('/api/team', teamRoutes);
 
 // Serve static client build in production
-const clientBuildPath = path.join(__dirname, '..', 'client', 'dist');
-app.use(express.static(clientBuildPath));
+const clientBuildPath = path.resolve(__dirname, '..', 'client', 'dist');
+const indexHtmlPath = path.join(clientBuildPath, 'index.html');
+
+if (fs.existsSync(clientBuildPath)) {
+  console.log(`[Static] Serving client build from: ${clientBuildPath}`);
+  app.use(express.static(clientBuildPath));
+
+  // Client-side routing catch-all
+  app.get('*', (req, res) => {
+    res.sendFile(indexHtmlPath, (err) => {
+      if (err) {
+        console.error('[Static] Error sending index.html:', err.message);
+        res.status(500).send('Application loading error. Please try again.');
+      }
+    });
+  });
+} else {
+  console.warn(`[Static] Client build not found at: ${clientBuildPath}`);
+  app.get('*', (req, res) => {
+    res.status(503).json({ error: 'Client build not available. Run npm run render-build first.' });
+  });
+}
 
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error('Global Error Handler:', err.stack);
   res.status(500).json({ success: false, error: 'Internal Server Error' });
-});
-
-// Client-side routing catch-all (must be after API routes and error handler)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
 // MongoDB Connection
@@ -90,6 +106,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Denesens Solutions Server running on port ${PORT}`);
   console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📂 Client build: ${fs.existsSync(clientBuildPath) ? 'FOUND' : 'NOT FOUND'}`);
   console.log(`====================================================`);
 });
 
