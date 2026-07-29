@@ -12,7 +12,7 @@
     "build:client": "npm --prefix client run build",
     "start:server": "npm --prefix server start",
     "seed": "npm --prefix server run seed",
-    "render-build": "npm --prefix server install && npm --prefix client install && npm --prefix client run build && npm --prefix server run seed",
+    "render-build": "npm --prefix server install && npm --prefix client install --include=dev && npm --prefix client run build && npm --prefix server run seed",
     "start": "npm --prefix server start"
   },
   "devDependencies": {
