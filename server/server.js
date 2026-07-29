@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 5000;
 // CORS setup
 const allowedOrigins = [
   process.env.CLIENT_URL,
+  'https://denesens.onrender.com',
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173'
@@ -22,14 +23,20 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow same-origin requests (no origin header), allowed origins, or *.onrender.com
-    if (!origin || allowedOrigins.includes(origin) || (origin && origin.endsWith('.onrender.com'))) {
-      callback(null, true);
-    } else if (process.env.NODE_ENV !== 'production') {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS policy violation'));
+    // Allow same-origin requests (no origin header)
+    if (!origin) {
+      return callback(null, true);
     }
+    // Allow listed origins and any *.onrender.com subdomain
+    if (allowedOrigins.includes(origin) || /^https?:\/\/.*\.onrender\.com$/.test(origin)) {
+      return callback(null, true);
+    }
+    // Allow all origins in development
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    // Reject unknown origins in production (don't throw — just deny)
+    callback(null, false);
   },
   credentials: true
 }));
