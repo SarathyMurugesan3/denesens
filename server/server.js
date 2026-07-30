@@ -48,13 +48,15 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 let fallbackAdminMembers = [
   {
     _id: 'mem-1',
-    name: 'Sarathy M (Owner)',
-    username: 'owner',
-    password: 'ownerpassword123',
-    role: 'owner',
-    createdBy: 'System'
+    name: 'Durai Rajan G',
+    username: 'durai_admin',
+    password: 'password123',
+    role: 'editor',
+    createdBy: 'Owner',
+    createdAt: new Date().toISOString()
   }
 ];
+global.fallbackAdminMembers = fallbackAdminMembers;
 
 // Health Check API
 app.get('/api/health', (req, res) => {

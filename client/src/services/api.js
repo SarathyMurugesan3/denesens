@@ -72,7 +72,30 @@ export const applyThemeToDOM = (settings) => {
   if (typeof document === 'undefined' || !settings) return;
   const root = document.documentElement;
 
-  // Set default data attributes
+  // Exclude Secret Admin route from dynamic theme overrides
+  const isSecretAdminPage = typeof window !== 'undefined' && window.location.pathname.startsWith('/secret-admin');
+
+  if (isSecretAdminPage) {
+    // Reset inline custom CSS variables for Secret Admin to maintain clean neutral theme
+    root.style.removeProperty('--theme-bg-main');
+    root.style.removeProperty('--theme-bg-card');
+    root.style.removeProperty('--theme-text-main');
+    root.style.removeProperty('--theme-text-sub');
+    root.style.removeProperty('--accent-main');
+    root.style.removeProperty('--accent-dark');
+    root.style.removeProperty('--theme-border');
+    root.style.removeProperty('--theme-font-heading');
+    root.style.removeProperty('--theme-font-body');
+    root.style.removeProperty('--font-scale');
+
+    root.setAttribute('data-theme-bg', 'white');
+    root.setAttribute('data-font', 'outfit');
+    root.setAttribute('data-accent', 'gold');
+    root.setAttribute('data-radius', 'rounded-3xl');
+    return;
+  }
+
+  // Main Website Pages: Apply Custom Themes, Colors & Fonts
   root.setAttribute('data-theme-bg', settings.themeBg || 'white');
   root.setAttribute('data-font', settings.fontFamily || 'outfit');
   root.setAttribute('data-accent', settings.accentColor || 'gold');
@@ -88,6 +111,16 @@ export const applyThemeToDOM = (settings) => {
     root.style.setProperty('--accent-dark', settings.customAccentColor);
   }
   if (settings.customBorderColor) root.style.setProperty('--theme-border', settings.customBorderColor);
+
+  // Font Size Scale
+  const fontScaleMap = {
+    'normal': '100%',
+    'large': '115%',
+    'xlarge': '130%'
+  };
+  if (settings.fontSizeScale) {
+    root.style.setProperty('--font-scale', fontScaleMap[settings.fontSizeScale] || '100%');
+  }
 
   if (settings.headingFont) {
     const headingFontMap = {

@@ -30,6 +30,7 @@ const siteSettingsSchema = new mongoose.Schema({
   customBorderColor: { type: String, default: '#E2E8F0' },
   headingFont: { type: String, default: 'Outfit' },
   bodyFont: { type: String, default: 'Inter' },
+  fontSizeScale: { type: String, default: 'normal' },
 
   socialLinks: {
     linkedin: { type: String, default: 'https://linkedin.com' },

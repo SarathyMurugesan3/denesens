@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   Lock, Unlock, ShieldAlert, Plus, Edit, Trash2, LogOut, Check, X,
   Briefcase, Package, Users, Eye, HelpCircle, ExternalLink, RefreshCw,
-  Settings, BarChart3, Star, FolderGit2, Mail, Save, Sparkles, ShieldCheck, UserPlus, UserCheck, KeyRound, UserX, Palette
+  Settings, BarChart3, Star, FolderGit2, Mail, Save, Sparkles, ShieldCheck, UserPlus, UserCheck, KeyRound, UserX, Palette, RotateCcw
 } from 'lucide-react';
 import Modal from '../components/Modal';
 import { 
@@ -60,6 +60,7 @@ export const MasterAdmin = () => {
     customBorderColor: '#E2E8F0',
     headingFont: 'Outfit',
     bodyFont: 'Inter',
+    fontSizeScale: 'normal',
     socialLinks: {
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com',
@@ -633,12 +634,44 @@ export const MasterAdmin = () => {
               
               {/* 🎨 Website Theme, Font & Color Customizer Panel */}
               <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-6">
-                <div className="flex items-center gap-2">
-                  <Palette className="w-5 h-5 text-gold-600" />
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900">🎨 Website Theme, Font & Color Customizer</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">Customize section colors, fonts, accent colors, and card styles for the entire website in real time.</p>
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-2">
+                    <Palette className="w-5 h-5 text-gold-600" />
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900">🎨 Website Theme, Font & Color Customizer</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">Customize section colors, fonts, font sizes, accent colors, and card styles for the entire main website in real time.</p>
+                    </div>
                   </div>
+
+                  {/* 🔄 RESET ALL COLORS & FONTS TO ORIGINAL DEFAULTS BUTTON */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!window.confirm('Are you sure you want to reset all website colors, fonts, and sizes to original defaults?')) return;
+                      const resetState = {
+                        ...settings,
+                        themeBg: 'white',
+                        fontFamily: 'outfit',
+                        accentColor: 'gold',
+                        cardRadius: 'rounded-3xl',
+                        customBgColor: '#FFFFFF',
+                        customCardColor: '#F8FAFC',
+                        customTextColor: '#0F172A',
+                        customSubtextColor: '#475569',
+                        customAccentColor: '#D4AF37',
+                        customBorderColor: '#E2E8F0',
+                        headingFont: 'Outfit',
+                        bodyFont: 'Inter',
+                        fontSizeScale: 'normal'
+                      };
+                      setSettings(resetState);
+                      applyThemeToDOM(resetState);
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 text-xs font-bold flex items-center gap-2 shadow-sm transition-all"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>RESET ALL COLORS & FONTS TO DEFAULTS</span>
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -886,8 +919,8 @@ export const MasterAdmin = () => {
 
                 {/* 🔤 Granular Heading & Body Font Family Customization */}
                 <div className="pt-4 border-t border-slate-200 space-y-4">
-                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-900">🔤 Typography & Font Family Customization</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-900">🔤 Typography & Font Scale Customization</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Heading Font Family</label>
                       <select
@@ -923,6 +956,22 @@ export const MasterAdmin = () => {
                         <option value="Work Sans">Work Sans (Executive Tech)</option>
                         <option value="Plus Jakarta Sans">Plus Jakarta Sans (Modern UI)</option>
                         <option value="Cormorant Garamond">Cormorant Garamond (High Fashion Serif)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Main Heading Font Size Scale</label>
+                      <select
+                        value={settings.fontSizeScale || 'normal'}
+                        onChange={(e) => {
+                          const updated = { ...settings, fontSizeScale: e.target.value };
+                          setSettings(updated); applyThemeToDOM(updated);
+                        }}
+                        className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-bold focus:border-gold-500"
+                      >
+                        <option value="normal">Standard Normal (100% Scale)</option>
+                        <option value="large">Large Executive (115% Scale)</option>
+                        <option value="xlarge">Extra Large Hero (130% Scale)</option>
                       </select>
                     </div>
                   </div>

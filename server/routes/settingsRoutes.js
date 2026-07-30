@@ -31,6 +31,7 @@ let fallbackSettings = {
   customBorderColor: '#E2E8F0',
   headingFont: 'Outfit',
   bodyFont: 'Inter',
+  fontSizeScale: 'normal',
   socialLinks: {
     linkedin: 'https://linkedin.com',
     twitter: 'https://twitter.com',
