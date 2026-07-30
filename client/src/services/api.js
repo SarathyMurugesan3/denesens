@@ -68,9 +68,21 @@ export const fetchTeam = async () => {
   }
 };
 
+export const applyThemeToDOM = (settings) => {
+  if (typeof document === 'undefined' || !settings) return;
+  const root = document.documentElement;
+  root.setAttribute('data-theme-bg', settings.themeBg || 'white');
+  root.setAttribute('data-font', settings.fontFamily || 'outfit');
+  root.setAttribute('data-accent', settings.accentColor || 'gold');
+  root.setAttribute('data-radius', settings.cardRadius || 'rounded-3xl');
+};
+
 export const fetchSettings = async () => {
   try {
     const res = await axios.get(`${API_BASE}/settings`);
+    if (res.data && res.data.data) {
+      applyThemeToDOM(res.data.data);
+    }
     return res.data.data;
   } catch (err) {
     console.warn('[API Client] Settings fetch fallback');

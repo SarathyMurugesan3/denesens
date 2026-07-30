@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   Lock, Unlock, ShieldAlert, Plus, Edit, Trash2, LogOut, Check, X,
   Briefcase, Package, Users, Eye, HelpCircle, ExternalLink, RefreshCw,
-  Settings, BarChart3, Star, FolderGit2, Mail, Save, Sparkles, ShieldCheck, UserPlus, UserCheck, KeyRound, UserX
+  Settings, BarChart3, Star, FolderGit2, Mail, Save, Sparkles, ShieldCheck, UserPlus, UserCheck, KeyRound, UserX, Palette
 } from 'lucide-react';
 import Modal from '../components/Modal';
 import { 
@@ -16,7 +16,8 @@ import {
   fetchTeam, createTeamMember, updateTeamMember, deleteTeamMember,
   fetchTestimonials, createTestimonial, updateTestimonial, deleteTestimonial,
   fetchContactSubmissions, subscribeCMSUpdate,
-  fetchAdminMembers, createAdminMember, deleteAdminMember
+  fetchAdminMembers, createAdminMember, deleteAdminMember,
+  applyThemeToDOM
 } from '../services/api';
 
 export const MasterAdmin = () => {
@@ -47,6 +48,10 @@ export const MasterAdmin = () => {
     aboutSubtitle: 'Denesens Solutions is a premier corporate software architecture firm based in Salem, Tamil Nadu, India. We fuse luxury design aesthetics with robust software engineering.',
     missionText: 'To empower forward-thinking organizations with intelligent, secure, and infinitely scalable software solutions—eliminating technical friction and accelerating enterprise innovation.',
     visionText: 'To stand as the global gold standard for luxury tech engineering—recognized for combining deep artificial intelligence, resilient cloud infrastructure, and unmatched visual design polish.',
+    themeBg: 'white',
+    fontFamily: 'outfit',
+    accentColor: 'gold',
+    cardRadius: 'rounded-3xl',
     socialLinks: {
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com',
@@ -613,6 +618,96 @@ export const MasterAdmin = () => {
             )}
 
             <form onSubmit={handleSaveSettings} className="space-y-6">
+              
+              {/* 🎨 Website Theme, Font & Color Customizer Panel */}
+              <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-6">
+                <div className="flex items-center gap-2">
+                  <Palette className="w-5 h-5 text-gold-600" />
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">🎨 Website Theme, Font & Color Customizer</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Customize section colors, fonts, accent colors, and card styles for the entire website in real time.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* 1. Section Background Mode */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Section Background Mode</label>
+                    <select
+                      value={settings.themeBg || 'white'}
+                      onChange={(e) => {
+                        const updated = { ...settings, themeBg: e.target.value };
+                        setSettings(updated);
+                        applyThemeToDOM(updated);
+                      }}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-bold focus:border-gold-500"
+                    >
+                      <option value="white">Pure White Premium (#FFFFFF)</option>
+                      <option value="slate">Slate Light (#F1F5F9)</option>
+                      <option value="pearl">Warm Luxury Pearl (#FAF9F6)</option>
+                      <option value="obsidian">Dark Obsidian (#0A0E17)</option>
+                    </select>
+                  </div>
+
+                  {/* 2. Typography & Font Family */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Typography & Font Family</label>
+                    <select
+                      value={settings.fontFamily || 'outfit'}
+                      onChange={(e) => {
+                        const updated = { ...settings, fontFamily: e.target.value };
+                        setSettings(updated);
+                        applyThemeToDOM(updated);
+                      }}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-bold focus:border-gold-500"
+                    >
+                      <option value="outfit">Outfit & Inter (Modern Tech)</option>
+                      <option value="playfair">Playfair Display & Garamond (Luxury Serif)</option>
+                      <option value="montserrat">Montserrat & Roboto (Clean Corporate)</option>
+                      <option value="sora">Sora & Plus Jakarta Sans (Futuristic AI)</option>
+                      <option value="poppins">Poppins & Work Sans (Friendly Modern)</option>
+                    </select>
+                  </div>
+
+                  {/* 3. Accent Theme Color */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Primary Accent Theme Color</label>
+                    <select
+                      value={settings.accentColor || 'gold'}
+                      onChange={(e) => {
+                        const updated = { ...settings, accentColor: e.target.value };
+                        setSettings(updated);
+                        applyThemeToDOM(updated);
+                      }}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-bold focus:border-gold-500"
+                    >
+                      <option value="gold">Metallic Gold (#D4AF37)</option>
+                      <option value="amber">Amber Bronze (#D97706)</option>
+                      <option value="emerald">Emerald Jade (#059669)</option>
+                      <option value="sapphire">Sapphire Blue (#2563EB)</option>
+                      <option value="purple">Amethyst Purple (#7C3AED)</option>
+                    </select>
+                  </div>
+
+                  {/* 4. Card Border Radius */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Card Style & Border Radius</label>
+                    <select
+                      value={settings.cardRadius || 'rounded-3xl'}
+                      onChange={(e) => {
+                        const updated = { ...settings, cardRadius: e.target.value };
+                        setSettings(updated);
+                        applyThemeToDOM(updated);
+                      }}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-bold focus:border-gold-500"
+                    >
+                      <option value="rounded-3xl">Soft Curved (24px - rounded-3xl)</option>
+                      <option value="rounded-xl">Modern Rounded (12px - rounded-xl)</option>
+                      <option value="rounded-md">Executive Sharp (6px - rounded-md)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Brand Name</label>
