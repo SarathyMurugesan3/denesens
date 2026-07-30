@@ -2,13 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Target, Compass, Award, Linkedin, Twitter, Github, CheckCircle2, Milestone } from 'lucide-react';
 import GoldOrnament from '../components/GoldOrnament';
-import { fetchTeam } from '../services/api';
+import { fetchTeam, fetchSettings } from '../services/api';
 
 export const About = () => {
   const [team, setTeam] = useState([]);
+  const [settings, setSettings] = useState({
+    aboutTitle: 'Engineering High-Performance Digital Intelligence',
+    aboutSubtitle: 'Denesens Solutions is a premier corporate software architecture firm based in Salem, Tamil Nadu, India. We fuse luxury design aesthetics with robust software engineering.',
+    missionText: 'To empower forward-thinking organizations with intelligent, secure, and infinitely scalable software solutions—eliminating technical friction and accelerating enterprise innovation.',
+    visionText: 'To stand as the global gold standard for luxury tech engineering—recognized for combining deep artificial intelligence, resilient cloud infrastructure, and unmatched visual design polish.'
+  });
 
   useEffect(() => {
     fetchTeam().then(res => setTeam(res));
+    fetchSettings().then(res => { if (res) setSettings(res); });
   }, []);
 
   const milestones = [
@@ -19,39 +26,39 @@ export const About = () => {
   ];
 
   return (
-    <div className="pt-28 pb-20 min-h-screen bg-dark-900 text-gray-200">
+    <div className="pt-28 pb-20 min-h-screen bg-dark-950 text-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
         
         {/* Header Title */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-semibold tracking-widest uppercase text-gold-400">ABOUT DENESENS SOLUTIONS</span>
+          <span className="text-xs font-bold tracking-widest uppercase text-gold-400">ABOUT DENESENS SOLUTIONS</span>
           <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-white">
-            Engineering High-Performance Digital Intelligence
+            <span className="gold-text">{settings.aboutTitle}</span>
           </h1>
-          <p className="text-base text-gray-400 leading-relaxed">
-            Denesens Solutions is a premier corporate software architecture firm based in Salem, Tamil Nadu, India. We fuse luxury design aesthetics with robust software engineering.
+          <p className="text-base text-gray-300 leading-relaxed">
+            {settings.aboutSubtitle}
           </p>
         </div>
 
         {/* Mission & Vision Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="p-8 rounded-3xl bg-dark-850 border border-gold-500/30 space-y-4 relative overflow-hidden shadow-xl">
-            <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400">
+          <div className="p-8 rounded-3xl bg-dark-900 border border-gold-400/30 space-y-4 relative overflow-hidden shadow-xl">
+            <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400 shadow-gold-glow">
               <Target className="w-6 h-6" />
             </div>
             <h2 className="text-2xl font-bold font-heading text-white">Our Mission</h2>
             <p className="text-sm text-gray-300 leading-relaxed">
-              To empower forward-thinking organizations with intelligent, secure, and infinitely scalable software solutions—eliminating technical friction and accelerating enterprise innovation.
+              {settings.missionText}
             </p>
           </div>
 
-          <div className="p-8 rounded-3xl bg-dark-850 border border-gold-500/30 space-y-4 relative overflow-hidden shadow-xl">
-            <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400">
+          <div className="p-8 rounded-3xl bg-dark-900 border border-gold-400/30 space-y-4 relative overflow-hidden shadow-xl">
+            <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400 shadow-gold-glow">
               <Compass className="w-6 h-6" />
             </div>
             <h2 className="text-2xl font-bold font-heading text-white">Our Vision</h2>
             <p className="text-sm text-gray-300 leading-relaxed">
-              To stand as the global gold standard for luxury tech engineering—recognized for combining deep artificial intelligence, resilient cloud infrastructure, and unmatched visual design polish.
+              {settings.visionText}
             </p>
           </div>
         </div>
@@ -61,7 +68,7 @@ export const About = () => {
         {/* Team Leadership Section */}
         <div className="space-y-12">
           <div className="text-center space-y-3 max-w-xl mx-auto">
-            <span className="text-xs font-semibold tracking-widest uppercase text-gold-400">EXECUTIVE LEADERSHIP</span>
+            <span className="text-xs font-bold tracking-widest uppercase text-gold-400">EXECUTIVE LEADERSHIP</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-white">Meet Our Core Team</h2>
             <p className="text-sm text-gray-400">
               The visionaries driving Denesens Solutions' corporate direction and technical execution.
@@ -73,11 +80,11 @@ export const About = () => {
               <motion.div
                 key={member._id}
                 whileHover={{ y: -8 }}
-                className="p-8 rounded-3xl bg-dark-850 border border-gold-500/30 text-center space-y-6 shadow-xl relative group hover:border-gold-500/60 transition-all duration-300"
+                className="p-8 rounded-3xl bg-dark-900 border border-gold-500/30 text-center space-y-6 shadow-xl relative group hover:border-gold-400/60 transition-all duration-300"
               >
-                {/* Gold-Ring Avatar Placeholder */}
+                {/* Round Avatar Frame */}
                 <div className="relative w-28 h-28 mx-auto rounded-full bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-300 p-1 shadow-gold-glow">
-                  <div className="w-full h-full rounded-full bg-dark-950 flex items-center justify-center text-gold-400 font-heading font-extrabold text-2xl tracking-wider">
+                  <div className="w-full h-full rounded-full bg-dark-950 flex items-center justify-center text-gold-300 font-heading font-extrabold text-2xl tracking-wider">
                     {member.initials}
                   </div>
                 </div>
@@ -96,7 +103,7 @@ export const About = () => {
                 </p>
 
                 {/* Social Links */}
-                <div className="pt-4 border-t border-dark-700/60 flex items-center justify-center space-x-4">
+                <div className="pt-4 border-t border-dark-800 flex items-center justify-center space-x-4">
                   <a href={member.socialLinks?.linkedin || '#'} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full border border-gold-500/30 flex items-center justify-center text-gold-400 hover:bg-gold-500/20 hover:text-white transition-colors">
                     <Linkedin className="w-4 h-4" />
                   </a>
@@ -115,7 +122,7 @@ export const About = () => {
         {/* Milestone Timeline */}
         <div className="space-y-12">
           <div className="text-center space-y-3 max-w-xl mx-auto">
-            <span className="text-xs font-semibold tracking-widest uppercase text-gold-400 font-bold">GROWTH TRAJECTORY</span>
+            <span className="text-xs font-bold tracking-widest uppercase text-gold-400 font-bold">GROWTH TRAJECTORY</span>
             <h2 className="text-3xl font-extrabold font-heading text-white">Company Milestones</h2>
           </div>
 
@@ -125,7 +132,7 @@ export const About = () => {
                 <div className="absolute -left-[31px] sm:-left-[39px] top-1 w-5 h-5 rounded-full bg-dark-950 border-2 border-gold-400 group-hover:bg-gold-500 transition-colors shadow-gold-glow" />
                 <span className="text-xs font-extrabold uppercase tracking-widest text-gold-400">{item.year}</span>
                 <h3 className="text-lg font-bold font-heading text-white mt-0.5">{item.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed mt-1">{item.desc}</p>
+                <p className="text-xs text-gray-300 leading-relaxed mt-1">{item.desc}</p>
               </div>
             ))}
           </div>

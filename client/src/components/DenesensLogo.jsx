@@ -10,18 +10,20 @@ export const DenesensLogo = ({ size = 'medium', showText = true, className = '' 
 
   return (
     <div className={`flex items-center gap-3 select-none ${className}`}>
-      {/* SVG Stylized Gold Circuit D Logo Mark */}
-      <div className="relative group cursor-pointer">
-        <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-gold-300 via-gold-500 to-gold-700 opacity-30 blur-sm group-hover:opacity-75 transition duration-500"></div>
-        <img 
-          src="/logo.jpg" 
-          alt="Denesens Solutions Logo" 
-          className={`relative rounded-md object-contain ${sizeClasses[size] || 'h-10'}`}
-          onError={(e) => {
-            // Render inline SVG if image file is not found
-            e.target.style.display = 'none';
-          }}
-        />
+      {/* Round Gold Logo Emblem */}
+      <div className="relative group cursor-pointer flex-shrink-0">
+        <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-gold-300 via-gold-400 to-gold-600 opacity-50 blur-sm group-hover:opacity-100 transition duration-500"></div>
+        <div className={`relative rounded-full overflow-hidden border-2 border-gold-400/60 p-0.5 bg-dark-950 shadow-gold-glow flex items-center justify-center ${sizeClasses[size] || 'h-10'} aspect-square`}>
+          <img 
+            src="/logo.jpg" 
+            alt="Denesens Solutions Logo" 
+            className="w-full h-full rounded-full object-cover"
+            onError={(e) => {
+              // Render fallback circular logo icon if image file is not found
+              e.target.style.display = 'none';
+            }}
+          />
+        </div>
       </div>
 
       {showText && (

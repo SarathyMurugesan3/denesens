@@ -8,6 +8,9 @@ const contactRoutes = require('./routes/contactRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
 const productRoutes = require('./routes/productRoutes');
 const teamRoutes = require('./routes/teamRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
+const portfolioRoutes = require('./routes/portfolioRoutes');
+const testimonialRoutes = require('./routes/testimonialRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -69,6 +72,9 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/team', teamRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/testimonials', testimonialRoutes);
 
 // Serve static client build in production
 const clientBuildPath = path.join(__dirname, '..', 'client', 'dist');

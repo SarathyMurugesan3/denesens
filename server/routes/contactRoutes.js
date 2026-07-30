@@ -29,6 +29,34 @@ const createTransporter = () => {
   return null;
 };
 
+const adminAuth = require('../middleware/adminAuth');
+
+let fallbackSubmissions = [
+  {
+    _id: 'sub-1',
+    name: 'Robert Vance',
+    email: 'robert@apexcapital.com',
+    phone: '+1 (555) 234-5678',
+    company: 'Apex Capital',
+    subject: 'AI & Data Solutions',
+    message: 'We are looking to implement a custom RAG vector search engine for internal compliance audit documents.',
+    createdAt: new Date()
+  }
+];
+
+// GET /api/contact (Admin Only)
+router.get('/', adminAuth, async (req, res) => {
+  try {
+    const list = await ContactSubmission.find().sort({ createdAt: -1 });
+    if (list && list.length > 0) {
+      return res.json({ success: true, data: list });
+    }
+    return res.json({ success: true, data: fallbackSubmissions });
+  } catch (err) {
+    return res.json({ success: true, data: fallbackSubmissions });
+  }
+});
+
 // POST /api/contact
 router.post('/', contactLimiter, [
   body('name').trim().notEmpty().withMessage('Name is required'),
@@ -71,6 +99,7 @@ router.post('/', contactLimiter, [
         message,
         createdAt: new Date()
       };
+      fallbackSubmissions.unshift(savedSubmission);
     }
 
     // Nodemailer notification dispatch
