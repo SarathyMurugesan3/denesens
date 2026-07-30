@@ -105,6 +105,13 @@ export const MasterAdmin = () => {
   const [testimonialForm, setTestimonialForm] = useState({ name: '', role: '', company: '', content: '', rating: 5, order: 0 });
 
   useEffect(() => {
+    document.body.classList.add('secret-admin-body');
+    return () => {
+      document.body.classList.remove('secret-admin-body');
+    };
+  }, []);
+
+  useEffect(() => {
     const cachedSecret = localStorage.getItem('admin_secret');
     const cachedUser = localStorage.getItem('admin_user');
     if (cachedSecret) {

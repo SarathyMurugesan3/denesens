@@ -127,3 +127,76 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* ----------------- DYNAMIC MAIN WEBSITE THEME OVERRIDES (EXCLUDES SECRET ADMIN) ----------------- */
+body:not(.secret-admin-body) {
+  background-color: var(--theme-bg-main, #FFFFFF) !important;
+  color: var(--theme-text-main, #0F172A) !important;
+  font-family: var(--theme-font-body, 'Inter', sans-serif) !important;
+}
+
+body:not(.secret-admin-body) h1,
+body:not(.secret-admin-body) h2,
+body:not(.secret-admin-body) h3,
+body:not(.secret-admin-body) h4,
+body:not(.secret-admin-body) h5,
+body:not(.secret-admin-body) h6,
+body:not(.secret-admin-body) .font-heading {
+  font-family: var(--theme-font-heading, 'Outfit', sans-serif) !important;
+}
+
+/* Main Section & Page Outer Backgrounds */
+body:not(.secret-admin-body) .min-h-screen.bg-white,
+body:not(.secret-admin-body) .min-h-screen.bg-slate-50,
+body:not(.secret-admin-body) .bg-white,
+body:not(.secret-admin-body) .bg-slate-50,
+body:not(.secret-admin-body) .bg-slate-100 {
+  background-color: var(--theme-bg-main, #FFFFFF) !important;
+}
+
+/* Card Container Backgrounds */
+body:not(.secret-admin-body) .shadow-card,
+body:not(.secret-admin-body) .shadow-luxury,
+body:not(.secret-admin-body) .p-8.rounded-3xl,
+body:not(.secret-admin-body) .p-6.rounded-3xl,
+body:not(.secret-admin-body) .bg-slate-50.border,
+body:not(.secret-admin-body) .bg-white.border {
+  background-color: var(--theme-bg-card, #F8FAFC) !important;
+  border-color: var(--theme-border, #E2E8F0) !important;
+}
+
+/* Headings & Primary Text Colors */
+body:not(.secret-admin-body) .text-slate-900,
+body:not(.secret-admin-body) .text-slate-800,
+body:not(.secret-admin-body) h1,
+body:not(.secret-admin-body) h2,
+body:not(.secret-admin-body) h3 {
+  color: var(--theme-text-main, #0F172A) !important;
+}
+
+/* Subtitle & Body Paragraph Text Colors */
+body:not(.secret-admin-body) .text-slate-700,
+body:not(.secret-admin-body) .text-slate-600,
+body:not(.secret-admin-body) .text-slate-500,
+body:not(.secret-admin-body) p {
+  color: var(--theme-text-sub, #475569) !important;
+}
+
+/* Accent Highlights & Badges */
+body:not(.secret-admin-body) .text-gold-700,
+body:not(.secret-admin-body) .text-gold-800,
+body:not(.secret-admin-body) .text-gold-600 {
+  color: var(--accent-main, #D4AF37) !important;
+}
+
+body:not(.secret-admin-body) .bg-gold-gradient {
+  background: linear-gradient(135deg, var(--theme-bg-card, #F8FAFC) 0%, var(--accent-main, #D4AF37) 50%, var(--accent-dark, #B8860B) 100%) !important;
+  color: #0F172A !important;
+}
+
+/* Border & Divider Overrides */
+body:not(.secret-admin-body) .border-slate-200,
+body:not(.secret-admin-body) .border-slate-300,
+body:not(.secret-admin-body) .border-slate-100 {
+  border-color: var(--theme-border, #E2E8F0) !important;
+}
