@@ -132,16 +132,37 @@ const getAdminHeaders = () => {
   };
 };
 
-export const verifyAdminPasscode = async (password) => {
+export const verifyAdminPasscode = async (password, username = '') => {
   try {
-    const res = await axios.post(`${API_BASE}/admin/verify`, { password });
+    const res = await axios.post(`${API_BASE}/admin/verify`, { password, username });
     return res.data;
   } catch (err) {
     if (err.response && err.response.data) {
       throw err.response.data;
     }
-    throw { success: false, error: 'Network error or invalid passcode.' };
+    throw { success: false, error: 'Network error or invalid credentials.' };
   }
+};
+
+// Admin Member Access Control
+export const fetchAdminMembers = async () => {
+  try {
+    const res = await axios.get(`${API_BASE}/admin/members`, getAdminHeaders());
+    return res.data.data;
+  } catch (err) {
+    console.warn('[API Client] Admin members fetch fallback');
+    return [];
+  }
+};
+
+export const createAdminMember = async (memberData) => {
+  const res = await axios.post(`${API_BASE}/admin/members`, memberData, getAdminHeaders());
+  return res.data.data;
+};
+
+export const deleteAdminMember = async (id) => {
+  const res = await axios.delete(`${API_BASE}/admin/members/${id}`, getAdminHeaders());
+  return res.data;
 };
 
 // Site Settings Admin

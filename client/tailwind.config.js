@@ -8,24 +8,28 @@ export default {
     extend: {
       colors: {
         gold: {
-          100: '#FFF9E6',
-          200: '#FFE899',
-          300: '#FFD700', // Electric Metallic Gold
-          400: '#F5C518', // Bright Amber Gold
-          500: '#E5A900', // Rich Gold Base
-          600: '#C48A00', // Deep Gold Accent
-          700: '#996B00',
+          100: '#FFFDF5',
+          200: '#FDF6D8',
+          300: '#F5E396',
+          400: '#D4AF37', // Luxury Metallic Gold
+          500: '#C59B27', // Rich Gold Base
+          600: '#B8860B', // Deep Gold Accent
+          700: '#8C6605',
+          800: '#664A04',
         },
-        cyan: {
-          400: '#00F2FE',
-          500: '#4FACFE',
+        light: {
+          50: '#FFFFFF',
+          100: '#F8FAFC',
+          200: '#F1F5F9',
+          300: '#E2E8F0',
+          400: '#CBD5E1',
         },
-        dark: {
-          950: '#05070A',
-          900: '#0A0E17',
-          850: '#111827',
-          800: '#1F2937',
-          700: '#374151',
+        slate: {
+          900: '#0F172A',
+          800: '#1E293B',
+          700: '#334155',
+          600: '#475569',
+          500: '#64748B',
         }
       },
       fontFamily: {
@@ -33,15 +37,16 @@ export default {
         body: ['Inter', 'Work Sans', 'sans-serif'],
       },
       backgroundImage: {
-        'gold-gradient': 'linear-gradient(135deg, #FFE899 0%, #FFD700 40%, #E5A900 100%)',
-        'gold-gradient-hover': 'linear-gradient(135deg, #FFFFFF 0%, #FFE899 50%, #FFD700 100%)',
-        'dark-glass': 'linear-gradient(180deg, rgba(17, 24, 39, 0.85) 0%, rgba(10, 14, 23, 0.95) 100%)',
-        'card-glow': 'radial-gradient(circle at top right, rgba(255, 215, 0, 0.25) 0%, transparent 70%)',
+        'gold-gradient': 'linear-gradient(135deg, #FDF6D8 0%, #D4AF37 50%, #B8860B 100%)',
+        'gold-gradient-hover': 'linear-gradient(135deg, #FFFFFF 0%, #FDF6D8 50%, #D4AF37 100%)',
+        'white-glass': 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%)',
+        'card-light': 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)',
       },
       boxShadow: {
-        'gold-glow': '0 0 25px rgba(255, 215, 0, 0.35)',
-        'gold-glow-lg': '0 0 45px rgba(255, 215, 0, 0.55)',
-        'gold-border': '0 0 12px rgba(255, 215, 0, 0.25)',
+        'card': '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+        'luxury': '0 10px 30px -4px rgba(15, 23, 42, 0.08)',
+        'modal': '0 20px 50px -10px rgba(15, 23, 42, 0.15)',
+        'gold-border': '0 0 0 1px rgba(212, 175, 55, 0.3)',
       },
       animation: {
         'shimmer': 'shimmer 3s infinite linear',

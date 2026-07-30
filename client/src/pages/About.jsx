@@ -34,38 +34,38 @@ export const About = () => {
   ];
 
   return (
-    <div className="pt-28 pb-20 min-h-screen bg-dark-950 text-gray-200">
+    <div className="pt-28 pb-20 min-h-screen bg-white text-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
         
         {/* Header Title */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-bold tracking-widest uppercase text-gold-400">ABOUT DENESENS SOLUTIONS</span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-white">
+          <span className="text-xs font-bold tracking-widest uppercase text-gold-700">ABOUT DENESENS SOLUTIONS</span>
+          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-slate-900">
             <span className="gold-text">{settings.aboutTitle}</span>
           </h1>
-          <p className="text-base text-gray-300 leading-relaxed">
+          <p className="text-base text-slate-600 leading-relaxed font-medium">
             {settings.aboutSubtitle}
           </p>
         </div>
 
         {/* Mission & Vision Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="p-8 rounded-3xl bg-dark-900 border border-gold-400/30 space-y-4 relative overflow-hidden shadow-xl">
-            <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400 shadow-gold-glow">
+          <div className="p-8 rounded-3xl bg-slate-50 border border-slate-200 space-y-4 relative overflow-hidden shadow-card">
+            <div className="w-12 h-12 rounded-xl bg-gold-100 border border-gold-400/30 flex items-center justify-center text-gold-700 shadow-sm">
               <Target className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-bold font-heading text-white">Our Mission</h2>
-            <p className="text-sm text-gray-300 leading-relaxed">
+            <h2 className="text-2xl font-bold font-heading text-slate-900">Our Mission</h2>
+            <p className="text-sm text-slate-700 leading-relaxed font-medium">
               {settings.missionText}
             </p>
           </div>
 
-          <div className="p-8 rounded-3xl bg-dark-900 border border-gold-400/30 space-y-4 relative overflow-hidden shadow-xl">
-            <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400 shadow-gold-glow">
+          <div className="p-8 rounded-3xl bg-slate-50 border border-slate-200 space-y-4 relative overflow-hidden shadow-card">
+            <div className="w-12 h-12 rounded-xl bg-gold-100 border border-gold-400/30 flex items-center justify-center text-gold-700 shadow-sm">
               <Compass className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-bold font-heading text-white">Our Vision</h2>
-            <p className="text-sm text-gray-300 leading-relaxed">
+            <h2 className="text-2xl font-bold font-heading text-slate-900">Our Vision</h2>
+            <p className="text-sm text-slate-700 leading-relaxed font-medium">
               {settings.visionText}
             </p>
           </div>
@@ -76,9 +76,9 @@ export const About = () => {
         {/* Team Leadership Section */}
         <div className="space-y-12">
           <div className="text-center space-y-3 max-w-xl mx-auto">
-            <span className="text-xs font-bold tracking-widest uppercase text-gold-400">EXECUTIVE LEADERSHIP</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-white">Meet Our Core Team</h2>
-            <p className="text-sm text-gray-400">
+            <span className="text-xs font-bold tracking-widest uppercase text-gold-700">EXECUTIVE LEADERSHIP</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-slate-900">Meet Our Core Team</h2>
+            <p className="text-sm text-slate-600 font-medium">
               The visionaries driving Denesens Solutions' corporate direction and technical execution.
             </p>
           </div>
@@ -88,41 +88,41 @@ export const About = () => {
               <motion.div
                 key={member._id}
                 whileHover={{ y: -8 }}
-                className="p-8 rounded-3xl bg-dark-900 border border-gold-500/30 text-center space-y-6 shadow-xl relative group hover:border-gold-400/60 transition-all duration-300"
+                className="p-8 rounded-3xl bg-white border border-slate-200 text-center space-y-6 shadow-card relative group hover:border-gold-400/60 transition-all duration-300"
               >
                 {/* Round Avatar Profile Picture Frame */}
-                <div className="relative w-28 h-28 mx-auto rounded-full bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-300 p-1 shadow-gold-glow">
+                <div className="relative w-28 h-28 mx-auto rounded-full border-2 border-gold-400 p-0.5 bg-white shadow-md">
                   {member.avatar ? (
                     <img src={member.avatar} alt={member.name} className="w-full h-full rounded-full object-cover" />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-dark-950 flex items-center justify-center text-gold-300 font-heading font-extrabold text-2xl tracking-wider">
+                    <div className="w-full h-full rounded-full bg-slate-100 flex items-center justify-center text-slate-900 font-heading font-extrabold text-2xl tracking-wider">
                       {member.initials}
                     </div>
                   )}
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-2xl font-bold font-heading text-white group-hover:text-gold-300 transition-colors">
+                  <h3 className="text-2xl font-bold font-heading text-slate-900 group-hover:text-gold-700 transition-colors">
                     {member.name}
                   </h3>
-                  <p className="text-xs font-bold uppercase tracking-widest text-gold-400 bg-gold-500/10 py-1 px-3 rounded-full inline-block border border-gold-500/20">
+                  <p className="text-xs font-bold uppercase tracking-widest text-gold-800 bg-gold-100 py-1 px-3 rounded-full inline-block border border-gold-400/30">
                     {member.role}
                   </p>
                 </div>
 
-                <p className="text-xs text-gray-300 leading-relaxed italic">
+                <p className="text-xs text-slate-600 leading-relaxed italic font-medium">
                   "{member.bio}"
                 </p>
 
                 {/* Social Links */}
-                <div className="pt-4 border-t border-dark-800 flex items-center justify-center space-x-4">
-                  <a href={member.socialLinks?.linkedin || '#'} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full border border-gold-500/30 flex items-center justify-center text-gold-400 hover:bg-gold-500/20 hover:text-white transition-colors">
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-center space-x-4">
+                  <a href={member.socialLinks?.linkedin || '#'} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-gold-100 hover:text-gold-800 transition-colors">
                     <Linkedin className="w-4 h-4" />
                   </a>
-                  <a href={member.socialLinks?.twitter || '#'} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full border border-gold-500/30 flex items-center justify-center text-gold-400 hover:bg-gold-500/20 hover:text-white transition-colors">
+                  <a href={member.socialLinks?.twitter || '#'} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-gold-100 hover:text-gold-800 transition-colors">
                     <Twitter className="w-4 h-4" />
                   </a>
-                  <a href={member.socialLinks?.github || '#'} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full border border-gold-500/30 flex items-center justify-center text-gold-400 hover:bg-gold-500/20 hover:text-white transition-colors">
+                  <a href={member.socialLinks?.github || '#'} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-gold-100 hover:text-gold-800 transition-colors">
                     <Github className="w-4 h-4" />
                   </a>
                 </div>
@@ -134,17 +134,17 @@ export const About = () => {
         {/* Milestone Timeline */}
         <div className="space-y-12">
           <div className="text-center space-y-3 max-w-xl mx-auto">
-            <span className="text-xs font-bold tracking-widest uppercase text-gold-400 font-bold">GROWTH TRAJECTORY</span>
-            <h2 className="text-3xl font-extrabold font-heading text-white">Company Milestones</h2>
+            <span className="text-xs font-bold tracking-widest uppercase text-gold-700">GROWTH TRAJECTORY</span>
+            <h2 className="text-3xl font-extrabold font-heading text-slate-900">Company Milestones</h2>
           </div>
 
-          <div className="relative border-l-2 border-gold-500/30 max-w-3xl mx-auto pl-6 sm:pl-8 space-y-10">
+          <div className="relative border-l-2 border-gold-400/40 max-w-3xl mx-auto pl-6 sm:pl-8 space-y-10">
             {milestones.map((item, index) => (
               <div key={index} className="relative group">
-                <div className="absolute -left-[31px] sm:-left-[39px] top-1 w-5 h-5 rounded-full bg-dark-950 border-2 border-gold-400 group-hover:bg-gold-500 transition-colors shadow-gold-glow" />
-                <span className="text-xs font-extrabold uppercase tracking-widest text-gold-400">{item.year}</span>
-                <h3 className="text-lg font-bold font-heading text-white mt-0.5">{item.title}</h3>
-                <p className="text-xs text-gray-300 leading-relaxed mt-1">{item.desc}</p>
+                <div className="absolute -left-[31px] sm:-left-[39px] top-1 w-5 h-5 rounded-full bg-white border-2 border-gold-500 group-hover:bg-gold-400 transition-colors shadow-sm" />
+                <span className="text-xs font-extrabold uppercase tracking-widest text-gold-700">{item.year}</span>
+                <h3 className="text-lg font-bold font-heading text-slate-900 mt-0.5">{item.title}</h3>
+                <p className="text-xs text-slate-600 leading-relaxed mt-1 font-medium">{item.desc}</p>
               </div>
             ))}
           </div>

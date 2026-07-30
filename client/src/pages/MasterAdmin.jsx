@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   Lock, Unlock, ShieldAlert, Plus, Edit, Trash2, LogOut, Check, X,
   Briefcase, Package, Users, Eye, HelpCircle, ExternalLink, RefreshCw,
-  Settings, BarChart3, Star, FolderGit2, Mail, Save, Sparkles, Building2, Phone, MapPin, Globe, Upload, Image
+  Settings, BarChart3, Star, FolderGit2, Mail, Save, Sparkles, ShieldCheck, UserPlus, UserCheck, KeyRound, UserX
 } from 'lucide-react';
 import Modal from '../components/Modal';
 import { 
@@ -15,16 +15,21 @@ import {
   fetchPortfolio, createPortfolio, updatePortfolio, deletePortfolio,
   fetchTeam, createTeamMember, updateTeamMember, deleteTeamMember,
   fetchTestimonials, createTestimonial, updateTestimonial, deleteTestimonial,
-  fetchContactSubmissions, subscribeCMSUpdate
+  fetchContactSubmissions, subscribeCMSUpdate,
+  fetchAdminMembers, createAdminMember, deleteAdminMember
 } from '../services/api';
 
 export const MasterAdmin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginMode, setLoginMode] = useState('passcode'); // 'passcode' or 'member'
   const [passcode, setPasscode] = useState('');
+  const [memberUsername, setMemberUsername] = useState('');
+  const [memberPassword, setMemberPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState({ name: 'Owner', role: 'owner', username: 'owner' });
 
-  // Active Tab: 'settings', 'stats', 'services', 'products', 'portfolio', 'team', 'testimonials', 'contacts'
+  // Active Tab: 'settings', 'stats', 'services', 'products', 'portfolio', 'team', 'testimonials', 'contacts', 'members'
   const [activeTab, setActiveTab] = useState('settings');
 
   // CMS State
@@ -33,7 +38,7 @@ export const MasterAdmin = () => {
     tagline: 'BUILDING INTELLIGENT SOLUTIONS',
     heroBadge: 'DENESENS SOLUTIONS — LUXURY SOFTWARE ARCHITECTURE',
     heroHeadline: 'We Engineer Intelligent Software Solutions',
-    heroSubheadline: 'Bridging high-end service engineering and robust in-house SaaS platforms. We build bespoke digital products, enterprise AI engines, and resilient cloud architectures with obsidian precision.',
+    heroSubheadline: 'Bridging high-end service engineering and robust in-house SaaS platforms. We build bespoke digital products, enterprise AI engines, and resilient cloud architectures.',
     phone: '+91 96295 68373',
     email: 'contact@denesens.com',
     address: 'Salem, Tamil Nadu, India',
@@ -61,15 +66,21 @@ export const MasterAdmin = () => {
   const [team, setTeam] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [adminMembers, setAdminMembers] = useState([]);
 
   // Data Loading
   const [fetchingData, setFetchingData] = useState(false);
 
-  // Modal controls
+  // Modal controls for content
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState('service');
   const [modalAction, setModalAction] = useState('create');
   const [selectedId, setSelectedId] = useState(null);
+
+  // Modal control for adding Admin Member
+  const [memberModalOpen, setMemberModalOpen] = useState(false);
+  const [newMemberForm, setNewMemberForm] = useState({ name: '', username: '', password: '' });
+  const [memberError, setMemberError] = useState('');
 
   // Form states
   const [statForm, setStatForm] = useState({ label: '', value: '', suffix: '', description: '', icon: 'Award', order: 0 });
@@ -81,15 +92,19 @@ export const MasterAdmin = () => {
 
   useEffect(() => {
     const cachedSecret = localStorage.getItem('admin_secret');
+    const cachedUser = localStorage.getItem('admin_user');
     if (cachedSecret) {
       setLoading(true);
-      verifyAdminPasscode(cachedSecret)
-        .then(() => {
+      const parsedUser = cachedUser ? JSON.parse(cachedUser) : { role: 'owner', name: 'Master Owner' };
+      verifyAdminPasscode(cachedSecret, parsedUser.username || '')
+        .then((res) => {
           setIsAuthenticated(true);
+          if (res.user) setCurrentUser(res.user);
           loadAllData();
         })
         .catch(() => {
           localStorage.removeItem('admin_secret');
+          localStorage.removeItem('admin_user');
         })
         .finally(() => setLoading(false));
     }
@@ -108,7 +123,7 @@ export const MasterAdmin = () => {
   const loadAllData = async () => {
     setFetchingData(true);
     try {
-      const [stgData, statData, srvData, prodData, portData, teamData, testData, cntData] = await Promise.all([
+      const [stgData, statData, srvData, prodData, portData, teamData, testData, cntData, membersData] = await Promise.all([
         fetchSettings(),
         fetchStats(),
         fetchServices(),
@@ -116,7 +131,8 @@ export const MasterAdmin = () => {
         fetchPortfolio(),
         fetchTeam(),
         fetchTestimonials(),
-        fetchContactSubmissions().catch(() => [])
+        fetchContactSubmissions().catch(() => []),
+        fetchAdminMembers().catch(() => [])
       ]);
       if (stgData) setSettings(prev => ({ ...prev, ...stgData }));
       if (statData) setStats(statData);
@@ -126,6 +142,7 @@ export const MasterAdmin = () => {
       if (teamData) setTeam(teamData);
       if (testData) setTestimonials(testData);
       if (cntData) setContacts(cntData);
+      if (membersData) setAdminMembers(membersData);
     } catch (err) {
       console.error('Failed to load CMS data:', err);
     } finally {
@@ -138,14 +155,24 @@ export const MasterAdmin = () => {
     setAuthError('');
     setLoading(true);
     try {
-      const res = await verifyAdminPasscode(passcode);
-      if (res.success) {
+      let res;
+      if (loginMode === 'passcode') {
+        res = await verifyAdminPasscode(passcode);
         localStorage.setItem('admin_secret', passcode);
+      } else {
+        res = await verifyAdminPasscode(memberPassword, memberUsername);
+        localStorage.setItem('admin_secret', memberPassword);
+      }
+
+      if (res.success) {
         setIsAuthenticated(true);
+        const userObj = res.user || { name: 'Admin Member', role: 'editor', username: memberUsername };
+        setCurrentUser(userObj);
+        localStorage.setItem('admin_user', JSON.stringify(userObj));
         loadAllData();
       }
     } catch (err) {
-      setAuthError(err.error || 'Authentication failed. Please check your passcode.');
+      setAuthError(err.error || 'Authentication failed. Please check your passcode or credentials.');
     } finally {
       setLoading(false);
     }
@@ -153,8 +180,11 @@ export const MasterAdmin = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('admin_secret');
+    localStorage.removeItem('admin_user');
     setIsAuthenticated(false);
     setPasscode('');
+    setMemberUsername('');
+    setMemberPassword('');
   };
 
   const generateSlug = (text) => {
@@ -176,7 +206,6 @@ export const MasterAdmin = () => {
     }
   };
 
-  // Base64 Image File Reader for Team Profile Uploads
   const handleAvatarFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -185,6 +214,31 @@ export const MasterAdmin = () => {
         setTeamForm(prev => ({ ...prev, avatar: reader.result }));
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  // Add New Admin Member (Owner Only)
+  const handleAddMember = async (e) => {
+    e.preventDefault();
+    setMemberError('');
+    try {
+      await createAdminMember(newMemberForm);
+      setMemberModalOpen(false);
+      setNewMemberForm({ name: '', username: '', password: '' });
+      loadAllData();
+    } catch (err) {
+      setMemberError(err.response?.data?.error || err.error || 'Failed to add admin member.');
+    }
+  };
+
+  // Revoke Admin Member (Owner Only)
+  const handleDeleteMember = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to revoke editing access for ${name}?`)) return;
+    try {
+      await deleteAdminMember(id);
+      loadAllData();
+    } catch (err) {
+      alert('Failed to delete admin member.');
     }
   };
 
@@ -351,36 +405,92 @@ export const MasterAdmin = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-dark-950 flex items-center justify-center px-4 py-20 relative overflow-hidden">
-        <div className="w-full max-w-md p-8 rounded-3xl bg-dark-900 border border-gold-400/40 shadow-gold-glow relative z-10 space-y-8">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-20 relative overflow-hidden">
+        <div className="w-full max-w-md p-8 rounded-3xl bg-white border border-slate-200 shadow-luxury relative z-10 space-y-8">
+          
           <div className="text-center space-y-3">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold-300 via-gold-400 to-gold-600 p-0.5 mx-auto flex items-center justify-center shadow-gold-glow">
-              <div className="w-full h-full rounded-full bg-dark-950 flex items-center justify-center text-gold-300">
-                <Lock className="w-8 h-8" />
-              </div>
+            <div className="w-16 h-16 rounded-full bg-gold-100 border border-gold-400 mx-auto flex items-center justify-center text-gold-700 shadow-sm">
+              <Lock className="w-8 h-8" />
             </div>
-            <h1 className="text-2xl font-extrabold font-heading text-white">SECRET ADMIN CMS</h1>
-            <p className="text-xs text-gold-400 font-semibold tracking-widest uppercase">Denesens Corporate Management Portal</p>
+            <h1 className="text-2xl font-extrabold font-heading text-slate-900">SECRET ADMIN CMS</h1>
+            <p className="text-xs text-gold-700 font-bold tracking-widest uppercase">Denesens Management Access</p>
+          </div>
+
+          {/* Login Mode Switcher */}
+          <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-100 border border-slate-200">
+            <button
+              type="button"
+              onClick={() => { setLoginMode('passcode'); setAuthError(''); }}
+              className={`py-2 text-xs font-bold rounded-xl transition-all ${
+                loginMode === 'passcode'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Master Owner Passcode
+            </button>
+            <button
+              type="button"
+              onClick={() => { setLoginMode('member'); setAuthError(''); }}
+              className={`py-2 text-xs font-bold rounded-xl transition-all ${
+                loginMode === 'member'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Member Login
+            </button>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
-                Secret Passcode
-              </label>
-              <input
-                type="password"
-                required
-                value={passcode}
-                onChange={(e) => setPasscode(e.target.value)}
-                placeholder="Enter secret admin passcode"
-                className="w-full px-4 py-3 rounded-xl bg-dark-850 border border-gold-500/30 text-white placeholder-gray-500 focus:outline-none focus:border-gold-400 text-sm"
-              />
-            </div>
+            {loginMode === 'passcode' ? (
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  Secret Owner Passcode
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={passcode}
+                  onChange={(e) => setPasscode(e.target.value)}
+                  placeholder="Enter secret owner passcode"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 text-sm font-medium"
+                />
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    Member Username
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={memberUsername}
+                    onChange={(e) => setMemberUsername(e.target.value)}
+                    placeholder="Enter your assigned username"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 text-sm font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    Member Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={memberPassword}
+                    onChange={(e) => setMemberPassword(e.target.value)}
+                    placeholder="Enter your member password"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 text-sm font-medium"
+                  />
+                </div>
+              </>
+            )}
 
             {authError && (
-              <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-300 text-xs flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-red-400 flex-shrink-0" />
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-red-600 flex-shrink-0" />
                 <span>{authError}</span>
               </div>
             )}
@@ -388,7 +498,7 @@ export const MasterAdmin = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-dark-950 font-bold uppercase tracking-widest text-xs shadow-gold-glow transition-all active:scale-95 disabled:opacity-50"
+              className="w-full py-3.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-slate-950 font-bold uppercase tracking-widest text-xs shadow-md transition-all active:scale-95 disabled:opacity-50"
             >
               {loading ? 'AUTHENTICATING...' : 'ENTER SECRET ADMIN CMS'}
             </button>
@@ -399,23 +509,23 @@ export const MasterAdmin = () => {
   }
 
   return (
-    <div className="pt-24 pb-20 min-h-screen bg-dark-950 text-gray-200">
+    <div className="pt-24 pb-20 min-h-screen bg-slate-50 text-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
-        {/* Top Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 rounded-3xl bg-dark-900 border border-gold-400/30 shadow-xl">
+        {/* Top Header Banner */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 rounded-3xl bg-white border border-slate-200 shadow-luxury">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full border-2 border-gold-400 p-0.5 bg-dark-950 flex items-center justify-center text-gold-300 shadow-gold-glow">
+            <div className="w-12 h-12 rounded-full border-2 border-gold-400 bg-gold-100 flex items-center justify-center text-gold-700 shadow-sm">
               <Unlock className="w-6 h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold font-heading text-white">SECRET ADMIN CMS</h1>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-gold-400/20 text-gold-300 border border-gold-400/40">
-                  REAL-TIME INSTANT SYNC ACTIVE
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-xl font-extrabold font-heading text-slate-900">SECRET ADMIN CMS</h1>
+                <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-gold-100 text-gold-800 border border-gold-400/40">
+                  {currentUser.role === 'owner' ? '👑 OWNER / SUPERADMIN' : '👤 EDITOR MEMBER'} ({currentUser.name})
                 </span>
               </div>
-              <p className="text-xs text-gray-400 mt-0.5">Any additions, edits, or deletions instantly update the live website without page reload.</p>
+              <p className="text-xs text-slate-500 mt-0.5">Real-time instant website synchronization active. Edits reflect immediately without page reload.</p>
             </div>
           </div>
 
@@ -423,14 +533,14 @@ export const MasterAdmin = () => {
             <button
               onClick={loadAllData}
               disabled={fetchingData}
-              className="px-4 py-2 rounded-xl bg-dark-800 border border-gold-500/30 text-gold-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition-colors"
+              className="px-4 py-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-700 hover:text-slate-900 text-xs font-bold flex items-center gap-2 transition-colors"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${fetchingData ? 'animate-spin' : ''}`} />
               <span>REFRESH DATA</span>
             </button>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 rounded-xl bg-red-950/40 border border-red-500/40 text-red-300 hover:bg-red-900/60 text-xs font-semibold flex items-center gap-2 transition-colors"
+              className="px-4 py-2 rounded-xl bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 text-xs font-bold flex items-center gap-2 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>LOGOUT</span>
@@ -439,7 +549,7 @@ export const MasterAdmin = () => {
         </div>
 
         {/* CMS Tabs Navigation */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-dark-800 scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 scrollbar-none">
           {[
             { id: 'settings', label: 'Site Content & Hero', icon: Settings, count: null },
             { id: 'stats', label: 'Stats & Metrics', icon: BarChart3, count: stats.length },
@@ -448,7 +558,8 @@ export const MasterAdmin = () => {
             { id: 'portfolio', label: 'Portfolio Cases', icon: FolderGit2, count: portfolio.length },
             { id: 'team', label: 'Executive Team', icon: Users, count: team.length },
             { id: 'testimonials', label: 'Testimonials', icon: Star, count: testimonials.length },
-            { id: 'contacts', label: 'Contact Messages', icon: Mail, count: contacts.length }
+            { id: 'contacts', label: 'Contact Messages', icon: Mail, count: contacts.length },
+            ...(currentUser.role === 'owner' ? [{ id: 'members', label: '👑 Admin Member Access', icon: KeyRound, count: adminMembers.length }] : [])
           ].map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -456,17 +567,17 @@ export const MasterAdmin = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2.5 rounded-xl font-medium text-xs tracking-wider uppercase flex items-center gap-2 whitespace-nowrap transition-all ${
+                className={`px-4 py-2.5 rounded-xl font-bold text-xs tracking-wider uppercase flex items-center gap-2 whitespace-nowrap transition-all ${
                   isActive
-                    ? 'bg-gold-gradient text-dark-950 font-bold shadow-gold-glow'
-                    : 'bg-dark-900 text-gray-300 hover:bg-dark-850 hover:text-gold-300 border border-gold-500/10'
+                    ? 'bg-gold-gradient text-slate-950 shadow-md'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200'
                 }`}
               >
                 <Icon className="w-4 h-4" />
                 <span>{tab.label}</span>
                 {tab.count !== null && (
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                    isActive ? 'bg-dark-950 text-gold-300' : 'bg-dark-800 text-gold-400'
+                    isActive ? 'bg-slate-950 text-gold-400' : 'bg-slate-100 text-slate-800 border border-slate-200'
                   }`}>
                     {tab.count}
                   </span>
@@ -478,16 +589,16 @@ export const MasterAdmin = () => {
 
         {/* ----------------- TAB 1: SITE CONTENT & HERO SETTINGS ----------------- */}
         {activeTab === 'settings' && (
-          <div className="p-8 rounded-3xl bg-dark-900 border border-gold-400/30 shadow-xl space-y-8">
-            <div className="flex items-center justify-between border-b border-dark-800 pb-4">
+          <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-luxury space-y-8">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
               <div>
-                <h2 className="text-xl font-bold font-heading text-white">Site Global Content & Hero Configuration</h2>
-                <p className="text-xs text-gray-400 mt-1">Edit main hero text, headlines, contact numbers, address, email, and corporate values.</p>
+                <h2 className="text-xl font-bold font-heading text-slate-900">Site Global Content & Hero Configuration</h2>
+                <p className="text-xs text-slate-500 mt-1">Edit main hero text, headlines, contact numbers, address, email, and corporate values.</p>
               </div>
               <button
                 onClick={handleSaveSettings}
                 disabled={savingSettings}
-                className="px-6 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-dark-950 font-bold uppercase tracking-widest text-xs shadow-gold-glow flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-slate-950 font-bold uppercase tracking-widest text-xs shadow-md flex items-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 <span>{savingSettings ? 'SAVING...' : 'SAVE ALL SETTINGS'}</span>
@@ -495,8 +606,8 @@ export const MasterAdmin = () => {
             </div>
 
             {settingsSavedSuccess && (
-              <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400" />
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-600" />
                 <span>Website settings successfully saved and updated across live website!</span>
               </div>
             )}
@@ -504,123 +615,123 @@ export const MasterAdmin = () => {
             <form onSubmit={handleSaveSettings} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-semibold text-gold-300 uppercase tracking-wider mb-2">Brand Name</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Brand Name</label>
                   <input
                     type="text"
                     value={settings.brandName}
                     onChange={(e) => setSettings({ ...settings, brandName: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm focus:border-gold-400 focus:outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gold-300 uppercase tracking-wider mb-2">Tagline</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tagline</label>
                   <input
                     type="text"
                     value={settings.tagline}
                     onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm focus:border-gold-400 focus:outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase tracking-wider mb-2">Hero Top Badge Text</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Hero Top Badge Text</label>
                 <input
                   type="text"
                   value={settings.heroBadge}
                   onChange={(e) => setSettings({ ...settings, heroBadge: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm focus:border-gold-400 focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase tracking-wider mb-2">Hero Main Headline</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Hero Main Headline</label>
                 <input
                   type="text"
                   value={settings.heroHeadline}
                   onChange={(e) => setSettings({ ...settings, heroHeadline: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm focus:border-gold-400 focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase tracking-wider mb-2">Hero Subheadline</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Hero Subheadline</label>
                 <textarea
                   rows={3}
                   value={settings.heroSubheadline}
                   onChange={(e) => setSettings({ ...settings, heroSubheadline: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm focus:border-gold-400 focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-dark-800">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-slate-200">
                 <div>
-                  <label className="block text-xs font-semibold text-gold-300 uppercase tracking-wider mb-2">Contact Phone</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Contact Phone</label>
                   <input
                     type="text"
                     value={settings.phone}
                     onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm focus:border-gold-400 focus:outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gold-300 uppercase tracking-wider mb-2">Contact Email</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Contact Email</label>
                   <input
                     type="text"
                     value={settings.email}
                     onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm focus:border-gold-400 focus:outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gold-300 uppercase tracking-wider mb-2">Office Address</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Office Address</label>
                   <input
                     type="text"
                     value={settings.address}
                     onChange={(e) => setSettings({ ...settings, address: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm focus:border-gold-400 focus:outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="space-y-4 pt-4 border-t border-dark-800">
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">About Page & Vision Content</h3>
+              <div className="space-y-4 pt-4 border-t border-slate-200">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">About Page & Vision Content</h3>
                 <div>
-                  <label className="block text-xs font-semibold text-gold-300 uppercase tracking-wider mb-2">About Page Subtitle</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">About Page Subtitle</label>
                   <textarea
                     rows={2}
                     value={settings.aboutSubtitle}
                     onChange={(e) => setSettings({ ...settings, aboutSubtitle: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm focus:border-gold-400 focus:outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-semibold text-gold-300 uppercase tracking-wider mb-2">Mission Statement</label>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Mission Statement</label>
                     <textarea
                       rows={3}
                       value={settings.missionText}
                       onChange={(e) => setSettings({ ...settings, missionText: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm focus:border-gold-400 focus:outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gold-300 uppercase tracking-wider mb-2">Vision Statement</label>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Vision Statement</label>
                     <textarea
                       rows={3}
                       value={settings.visionText}
                       onChange={(e) => setSettings({ ...settings, visionText: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm focus:border-gold-400 focus:outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end pt-6 border-t border-dark-800">
+              <div className="flex justify-end pt-6 border-t border-slate-200">
                 <button
                   type="submit"
                   disabled={savingSettings}
-                  className="px-8 py-3 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-dark-950 font-bold uppercase tracking-widest text-xs shadow-gold-glow flex items-center gap-2"
+                  className="px-8 py-3 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-slate-950 font-bold uppercase tracking-widest text-xs shadow-md flex items-center gap-2"
                 >
                   <Save className="w-4 h-4" />
                   <span>{savingSettings ? 'SAVING...' : 'SAVE ALL SETTINGS'}</span>
@@ -635,12 +746,12 @@ export const MasterAdmin = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold font-heading text-white">Key Metrics & Statistics</h2>
-                <p className="text-xs text-gray-400 mt-1">Manage stat counters displayed across the Home and About pages.</p>
+                <h2 className="text-xl font-bold font-heading text-slate-900">Key Metrics & Statistics</h2>
+                <p className="text-xs text-slate-500 mt-1">Manage stat counters displayed across the Home and About pages.</p>
               </div>
               <button
                 onClick={() => openCreateModal('stat')}
-                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-dark-950 font-bold uppercase tracking-widest text-xs shadow-gold-glow flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-slate-950 font-bold uppercase tracking-widest text-xs shadow-md flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 <span>ADD NEW STAT</span>
@@ -649,21 +760,21 @@ export const MasterAdmin = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map(stat => (
-                <div key={stat._id} className="p-6 rounded-3xl bg-dark-900 border border-gold-500/20 shadow-xl space-y-4 relative group">
+                <div key={stat._id} className="p-6 rounded-3xl bg-white border border-slate-200 shadow-card space-y-4 relative group">
                   <div className="flex items-center justify-between">
-                    <span className="text-3xl font-extrabold font-heading gold-text">{stat.value}</span>
+                    <span className="text-3xl font-extrabold font-heading text-gold-700">{stat.value}</span>
                     <div className="flex items-center gap-2">
-                      <button onClick={() => openEditModal('stat', stat)} className="p-2 rounded-lg bg-dark-800 text-gold-300 hover:text-white transition-colors">
+                      <button onClick={() => openEditModal('stat', stat)} className="p-2 rounded-lg bg-slate-100 text-slate-700 hover:text-slate-900 transition-colors">
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleDelete('stat', stat._id)} className="p-2 rounded-lg bg-red-950/50 text-red-400 hover:text-white transition-colors">
+                      <button onClick={() => handleDelete('stat', stat._id)} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">{stat.label}</h3>
-                    <p className="text-xs text-gray-400 mt-1">{stat.description}</p>
+                    <h3 className="text-sm font-bold text-slate-900">{stat.label}</h3>
+                    <p className="text-xs text-slate-500 mt-1">{stat.description}</p>
                   </div>
                 </div>
               ))}
@@ -676,12 +787,12 @@ export const MasterAdmin = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold font-heading text-white">Services Directory</h2>
-                <p className="text-xs text-gray-400 mt-1">Manage bespoke corporate services offered by Denesens Solutions.</p>
+                <h2 className="text-xl font-bold font-heading text-slate-900">Services Directory</h2>
+                <p className="text-xs text-slate-500 mt-1">Manage bespoke corporate services offered by Denesens Solutions.</p>
               </div>
               <button
                 onClick={() => openCreateModal('service')}
-                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-dark-950 font-bold uppercase tracking-widest text-xs shadow-gold-glow flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-slate-950 font-bold uppercase tracking-widest text-xs shadow-md flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 <span>ADD SERVICE</span>
@@ -690,26 +801,26 @@ export const MasterAdmin = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {services.map(srv => (
-                <div key={srv._id} className="p-6 rounded-3xl bg-dark-900 border border-gold-500/20 shadow-xl space-y-4 flex flex-col justify-between">
+                <div key={srv._id} className="p-6 rounded-3xl bg-white border border-slate-200 shadow-card space-y-4 flex flex-col justify-between">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-gold-500/10 text-gold-400 border border-gold-500/20">
+                      <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-gold-100 text-gold-800 border border-gold-400/30">
                         {srv.category}
                       </span>
                       <div className="flex items-center gap-2">
-                        <button onClick={() => openEditModal('service', srv)} className="p-1.5 rounded-lg bg-dark-800 text-gold-300 hover:text-white transition-colors">
+                        <button onClick={() => openEditModal('service', srv)} className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:text-slate-900 transition-colors">
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete('service', srv._id)} className="p-1.5 rounded-lg bg-red-950/50 text-red-400 hover:text-white transition-colors">
+                        <button onClick={() => handleDelete('service', srv._id)} className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                    <h3 className="text-lg font-bold text-white">{srv.title}</h3>
-                    <p className="text-xs text-gray-400 line-clamp-3">{srv.shortDesc}</p>
+                    <h3 className="text-lg font-bold text-slate-900">{srv.title}</h3>
+                    <p className="text-xs text-slate-600 line-clamp-3">{srv.shortDesc}</p>
                   </div>
 
-                  <div className="pt-4 border-t border-dark-800 flex items-center justify-between text-[11px] text-gray-400">
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
                     <span>Order: #{srv.order}</span>
                     <span>{srv.features?.length || 0} Features</span>
                   </div>
@@ -724,12 +835,12 @@ export const MasterAdmin = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold font-heading text-white">In-House SaaS Products</h2>
-                <p className="text-xs text-gray-400 mt-1">Manage Denesens proprietary SaaS engines and developer platforms.</p>
+                <h2 className="text-xl font-bold font-heading text-slate-900">In-House SaaS Products</h2>
+                <p className="text-xs text-slate-500 mt-1">Manage Denesens proprietary SaaS engines and developer platforms.</p>
               </div>
               <button
                 onClick={() => openCreateModal('product')}
-                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-dark-950 font-bold uppercase tracking-widest text-xs shadow-gold-glow flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-slate-950 font-bold uppercase tracking-widest text-xs shadow-md flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 <span>ADD PRODUCT</span>
@@ -738,25 +849,25 @@ export const MasterAdmin = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {products.map(prod => (
-                <div key={prod._id} className="p-6 rounded-3xl bg-dark-900 border border-gold-500/20 shadow-xl space-y-4">
+                <div key={prod._id} className="p-6 rounded-3xl bg-white border border-slate-200 shadow-card space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                    <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-800 border border-cyan-300">
                       {prod.badge}
                     </span>
                     <div className="flex items-center gap-2">
-                      <button onClick={() => openEditModal('product', prod)} className="p-1.5 rounded-lg bg-dark-800 text-gold-300 hover:text-white transition-colors">
+                      <button onClick={() => openEditModal('product', prod)} className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:text-slate-900 transition-colors">
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleDelete('product', prod._id)} className="p-1.5 rounded-lg bg-red-950/50 text-red-400 hover:text-white transition-colors">
+                      <button onClick={() => handleDelete('product', prod._id)} className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">{prod.name}</h3>
-                    <p className="text-xs text-gold-300 mt-0.5 italic">{prod.tagline}</p>
+                    <h3 className="text-lg font-bold text-slate-900">{prod.name}</h3>
+                    <p className="text-xs text-gold-700 font-semibold mt-0.5 italic">{prod.tagline}</p>
                   </div>
-                  <p className="text-xs text-gray-400 line-clamp-3">{prod.description}</p>
+                  <p className="text-xs text-slate-600 line-clamp-3">{prod.description}</p>
                 </div>
               ))}
             </div>
@@ -768,12 +879,12 @@ export const MasterAdmin = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold font-heading text-white">Portfolio Case Studies</h2>
-                <p className="text-xs text-gray-400 mt-1">Showcase high-impact enterprise projects delivered to clients.</p>
+                <h2 className="text-xl font-bold font-heading text-slate-900">Portfolio Case Studies</h2>
+                <p className="text-xs text-slate-500 mt-1">Showcase high-impact enterprise projects delivered to clients.</p>
               </div>
               <button
                 onClick={() => openCreateModal('portfolio')}
-                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-dark-950 font-bold uppercase tracking-widest text-xs shadow-gold-glow flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-slate-950 font-bold uppercase tracking-widest text-xs shadow-md flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 <span>ADD CASE STUDY</span>
@@ -782,25 +893,25 @@ export const MasterAdmin = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {portfolio.map(port => (
-                <div key={port._id} className="p-6 rounded-3xl bg-dark-900 border border-gold-500/20 shadow-xl space-y-4 flex flex-col justify-between">
+                <div key={port._id} className="p-6 rounded-3xl bg-white border border-slate-200 shadow-card space-y-4 flex flex-col justify-between">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-gold-500/10 text-gold-400 border border-gold-500/20">
+                      <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-gold-100 text-gold-800 border border-gold-400/30">
                         {port.category}
                       </span>
                       <div className="flex items-center gap-2">
-                        <button onClick={() => openEditModal('portfolio', port)} className="p-1.5 rounded-lg bg-dark-800 text-gold-300 hover:text-white transition-colors">
+                        <button onClick={() => openEditModal('portfolio', port)} className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:text-slate-900 transition-colors">
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete('portfolio', port._id)} className="p-1.5 rounded-lg bg-red-950/50 text-red-400 hover:text-white transition-colors">
+                        <button onClick={() => handleDelete('portfolio', port._id)} className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                    <h3 className="text-lg font-bold text-white">{port.title}</h3>
-                    <p className="text-xs text-gray-400 line-clamp-3">{port.description}</p>
+                    <h3 className="text-lg font-bold text-slate-900">{port.title}</h3>
+                    <p className="text-xs text-slate-600 line-clamp-3">{port.description}</p>
                     {port.impact && (
-                      <p className="text-xs text-gold-300 font-semibold italic bg-dark-850 p-2.5 rounded-xl border border-gold-500/20">
+                      <p className="text-xs text-gold-800 font-bold italic bg-gold-50 p-2.5 rounded-xl border border-gold-300">
                         "{port.impact}"
                       </p>
                     )}
@@ -816,12 +927,12 @@ export const MasterAdmin = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold font-heading text-white">Executive Team Roster</h2>
-                <p className="text-xs text-gray-400 mt-1">Manage corporate leaders (CEO, CTO, Marketing Lead) and profile pictures saved directly in MongoDB Atlas.</p>
+                <h2 className="text-xl font-bold font-heading text-slate-900">Executive Team Roster</h2>
+                <p className="text-xs text-slate-500 mt-1">Manage corporate leaders (CEO, CTO, Marketing Lead) and profile pictures saved in MongoDB Atlas.</p>
               </div>
               <button
                 onClick={() => openCreateModal('team')}
-                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-dark-950 font-bold uppercase tracking-widest text-xs shadow-gold-glow flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-slate-950 font-bold uppercase tracking-widest text-xs shadow-md flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 <span>ADD TEAM MEMBER</span>
@@ -830,27 +941,27 @@ export const MasterAdmin = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {team.map(member => (
-                <div key={member._id} className="p-6 rounded-3xl bg-dark-900 border border-gold-500/20 shadow-xl text-center space-y-4">
-                  {/* Round Gold Ring Profile Picture */}
-                  <div className="relative w-24 h-24 mx-auto rounded-full bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-300 p-1 shadow-gold-glow">
+                <div key={member._id} className="p-6 rounded-3xl bg-white border border-slate-200 shadow-card text-center space-y-4">
+                  {/* Round Gold Ring Profile Picture Frame */}
+                  <div className="relative w-24 h-24 mx-auto rounded-full border-2 border-gold-400 p-0.5 bg-white shadow-md">
                     {member.avatar ? (
                       <img src={member.avatar} alt={member.name} className="w-full h-full rounded-full object-cover" />
                     ) : (
-                      <div className="w-full h-full rounded-full bg-dark-950 flex items-center justify-center text-gold-300 font-bold text-2xl">
+                      <div className="w-full h-full rounded-full bg-slate-100 flex items-center justify-center text-slate-900 font-bold text-2xl">
                         {member.initials}
                       </div>
                     )}
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">{member.name}</h3>
-                    <p className="text-xs font-bold text-gold-400 uppercase tracking-widest">{member.role}</p>
+                    <h3 className="text-lg font-bold text-slate-900">{member.name}</h3>
+                    <p className="text-xs font-bold text-gold-700 uppercase tracking-widest">{member.role}</p>
                   </div>
-                  <p className="text-xs text-gray-400 italic">"{member.bio}"</p>
-                  <div className="pt-4 border-t border-dark-800 flex items-center justify-center gap-3">
-                    <button onClick={() => openEditModal('team', member)} className="px-3 py-1.5 rounded-lg bg-dark-800 text-gold-300 hover:text-white text-xs font-semibold flex items-center gap-1">
+                  <p className="text-xs text-slate-600 italic">"{member.bio}"</p>
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-center gap-3">
+                    <button onClick={() => openEditModal('team', member)} className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:text-slate-900 text-xs font-semibold flex items-center gap-1">
                       <Edit className="w-3.5 h-3.5" /> Edit Member
                     </button>
-                    <button onClick={() => handleDelete('team', member._id)} className="px-3 py-1.5 rounded-lg bg-red-950/50 text-red-400 hover:text-white text-xs font-semibold flex items-center gap-1">
+                    <button onClick={() => handleDelete('team', member._id)} className="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 text-xs font-semibold flex items-center gap-1">
                       <Trash2 className="w-3.5 h-3.5" /> Delete
                     </button>
                   </div>
@@ -865,12 +976,12 @@ export const MasterAdmin = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold font-heading text-white">Client Testimonials & Reviews</h2>
-                <p className="text-xs text-gray-400 mt-1">Manage client reviews shown on the Home and About pages.</p>
+                <h2 className="text-xl font-bold font-heading text-slate-900">Client Testimonials & Reviews</h2>
+                <p className="text-xs text-slate-500 mt-1">Manage client reviews shown on the Home and About pages.</p>
               </div>
               <button
                 onClick={() => openCreateModal('testimonial')}
-                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-dark-950 font-bold uppercase tracking-widest text-xs shadow-gold-glow flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-slate-950 font-bold uppercase tracking-widest text-xs shadow-md flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 <span>ADD TESTIMONIAL</span>
@@ -879,28 +990,28 @@ export const MasterAdmin = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {testimonials.map(t => (
-                <div key={t._id} className="p-6 rounded-3xl bg-dark-900 border border-gold-500/20 shadow-xl space-y-4 flex flex-col justify-between">
+                <div key={t._id} className="p-6 rounded-3xl bg-white border border-slate-200 shadow-card space-y-4 flex flex-col justify-between">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex text-gold-400 gap-1">
+                      <div className="flex text-gold-500 gap-1">
                         {[...Array(t.rating || 5)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-gold-400" />
+                          <Star key={i} className="w-4 h-4 fill-gold-500 text-gold-500" />
                         ))}
                       </div>
                       <div className="flex items-center gap-2">
-                        <button onClick={() => openEditModal('testimonial', t)} className="p-1.5 rounded-lg bg-dark-800 text-gold-300 hover:text-white transition-colors">
+                        <button onClick={() => openEditModal('testimonial', t)} className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:text-slate-900 transition-colors">
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete('testimonial', t._id)} className="p-1.5 rounded-lg bg-red-950/50 text-red-400 hover:text-white transition-colors">
+                        <button onClick={() => handleDelete('testimonial', t._id)} className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-300 italic">"{t.content}"</p>
+                    <p className="text-xs text-slate-600 italic">"{t.content}"</p>
                   </div>
-                  <div className="pt-4 border-t border-dark-800">
-                    <h4 className="text-sm font-bold text-white">{t.name}</h4>
-                    <p className="text-xs text-gold-400">{t.role} — {t.company}</p>
+                  <div className="pt-4 border-t border-slate-100">
+                    <h4 className="text-sm font-bold text-slate-900">{t.name}</h4>
+                    <p className="text-xs text-gold-700 font-bold">{t.role} — {t.company}</p>
                   </div>
                 </div>
               ))}
@@ -912,28 +1023,28 @@ export const MasterAdmin = () => {
         {activeTab === 'contacts' && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold font-heading text-white">Received Contact Inquiries</h2>
-              <p className="text-xs text-gray-400 mt-1">Inquiries submitted by users via the website contact form.</p>
+              <h2 className="text-xl font-bold font-heading text-slate-900">Received Contact Inquiries</h2>
+              <p className="text-xs text-slate-500 mt-1">Inquiries submitted by users via the website contact form.</p>
             </div>
 
             <div className="space-y-4">
               {contacts.length === 0 ? (
-                <div className="p-12 text-center text-gray-400 bg-dark-900 rounded-3xl border border-dark-800">
+                <div className="p-12 text-center text-slate-500 bg-white rounded-3xl border border-slate-200">
                   No contact messages received yet.
                 </div>
               ) : (
                 contacts.map(c => (
-                  <div key={c._id} className="p-6 rounded-3xl bg-dark-900 border border-gold-500/20 shadow-xl space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-dark-800 pb-3">
+                  <div key={c._id} className="p-6 rounded-3xl bg-white border border-slate-200 shadow-card space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                       <div>
-                        <h3 className="text-base font-bold text-white">{c.name}</h3>
-                        <p className="text-xs text-gold-400">{c.email} {c.phone ? `| ${c.phone}` : ''} {c.company ? `| ${c.company}` : ''}</p>
+                        <h3 className="text-base font-bold text-slate-900">{c.name}</h3>
+                        <p className="text-xs text-gold-700 font-semibold">{c.email} {c.phone ? `| ${c.phone}` : ''} {c.company ? `| ${c.company}` : ''}</p>
                       </div>
-                      <span className="text-[10px] font-bold text-gray-400 bg-dark-800 px-3 py-1 rounded-full uppercase tracking-wider">
+                      <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-wider">
                         Subject: {c.subject}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-300 whitespace-pre-wrap">{c.message}</p>
+                    <p className="text-xs text-slate-700 whitespace-pre-wrap">{c.message}</p>
                   </div>
                 ))
               )}
@@ -941,9 +1052,60 @@ export const MasterAdmin = () => {
           </div>
         )}
 
+        {/* ----------------- TAB 9: ADMIN MEMBER ACCESS CONTROL (OWNER ONLY) ----------------- */}
+        {activeTab === 'members' && currentUser.role === 'owner' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold font-heading text-slate-900">👑 Admin Member Access Control</h2>
+                <p className="text-xs text-slate-500 mt-1">Grant or revoke access for other team members to edit website content using their Name, Username, and Password.</p>
+              </div>
+              <button
+                onClick={() => { setMemberModalOpen(true); setMemberError(''); }}
+                className="px-4 py-2.5 rounded-xl bg-gold-gradient hover:bg-gold-gradient-hover text-slate-950 font-bold uppercase tracking-widest text-xs shadow-md flex items-center gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>ADD ADMIN MEMBER</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {adminMembers.map(member => (
+                <div key={member._id} className="p-6 rounded-3xl bg-white border border-slate-200 shadow-card space-y-4 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 border border-slate-200">
+                        {member.role === 'owner' ? '👑 OWNER' : '👤 EDITOR MEMBER'}
+                      </span>
+                      {member.role !== 'owner' && (
+                        <button
+                          onClick={() => handleDeleteMember(member._id, member.name)}
+                          className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                          title="Revoke editing access"
+                        >
+                          <UserX className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900">{member.name}</h3>
+                      <p className="text-xs text-gold-700 font-semibold font-mono">@{member.username}</p>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Created by: {member.createdBy || 'Owner'}</span>
+                    <span className="text-emerald-700 font-bold">● Active Access</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
       </div>
 
-      {/* ----------------- EDIT / CREATE MODAL ----------------- */}
+      {/* ----------------- EDIT / CREATE CONTENT MODAL ----------------- */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={`${modalAction === 'create' ? 'Add New' : 'Edit'} ${modalType.toUpperCase()}`}>
         <form onSubmit={handleFormSubmit} className="space-y-4">
           
@@ -951,16 +1113,16 @@ export const MasterAdmin = () => {
           {modalType === 'stat' && (
             <>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Metric Value (e.g., 150+)</label>
-                <input type="text" required value={statForm.value} onChange={e=>setStatForm({...statForm, value: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Metric Value (e.g., 150+)</label>
+                <input type="text" required value={statForm.value} onChange={e=>setStatForm({...statForm, value: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Label (e.g., Enterprise Projects Delivered)</label>
-                <input type="text" required value={statForm.label} onChange={e=>setStatForm({...statForm, label: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Label (e.g., Enterprise Projects Delivered)</label>
+                <input type="text" required value={statForm.label} onChange={e=>setStatForm({...statForm, label: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Short Description</label>
-                <input type="text" value={statForm.description} onChange={e=>setStatForm({...statForm, description: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Short Description</label>
+                <input type="text" value={statForm.description} onChange={e=>setStatForm({...statForm, description: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
             </>
           )}
@@ -969,16 +1131,16 @@ export const MasterAdmin = () => {
           {modalType === 'service' && (
             <>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Title</label>
-                <input type="text" required value={serviceForm.title} onChange={e=>setServiceForm({...serviceForm, title: e.target.value, slug: generateSlug(e.target.value)})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Title</label>
+                <input type="text" required value={serviceForm.title} onChange={e=>setServiceForm({...serviceForm, title: e.target.value, slug: generateSlug(e.target.value)})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Short Description</label>
-                <textarea rows={2} required value={serviceForm.shortDesc} onChange={e=>setServiceForm({...serviceForm, shortDesc: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Short Description</label>
+                <textarea rows={2} required value={serviceForm.shortDesc} onChange={e=>setServiceForm({...serviceForm, shortDesc: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Key Features (One per line)</label>
-                <textarea rows={3} value={serviceForm.featuresText} onChange={e=>setServiceForm({...serviceForm, featuresText: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Key Features (One per line)</label>
+                <textarea rows={3} value={serviceForm.featuresText} onChange={e=>setServiceForm({...serviceForm, featuresText: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
             </>
           )}
@@ -987,16 +1149,16 @@ export const MasterAdmin = () => {
           {modalType === 'product' && (
             <>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Product Name</label>
-                <input type="text" required value={productForm.name} onChange={e=>setProductForm({...productForm, name: e.target.value, slug: generateSlug(e.target.value)})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Product Name</label>
+                <input type="text" required value={productForm.name} onChange={e=>setProductForm({...productForm, name: e.target.value, slug: generateSlug(e.target.value)})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Tagline</label>
-                <input type="text" required value={productForm.tagline} onChange={e=>setProductForm({...productForm, tagline: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Tagline</label>
+                <input type="text" required value={productForm.tagline} onChange={e=>setProductForm({...productForm, tagline: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Description</label>
-                <textarea rows={3} required value={productForm.description} onChange={e=>setProductForm({...productForm, description: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Description</label>
+                <textarea rows={3} required value={productForm.description} onChange={e=>setProductForm({...productForm, description: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
             </>
           )}
@@ -1005,20 +1167,20 @@ export const MasterAdmin = () => {
           {modalType === 'portfolio' && (
             <>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Case Study Title</label>
-                <input type="text" required value={portfolioForm.title} onChange={e=>setPortfolioForm({...portfolioForm, title: e.target.value, slug: generateSlug(e.target.value)})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Case Study Title</label>
+                <input type="text" required value={portfolioForm.title} onChange={e=>setPortfolioForm({...portfolioForm, title: e.target.value, slug: generateSlug(e.target.value)})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Client Name</label>
-                <input type="text" value={portfolioForm.client} onChange={e=>setPortfolioForm({...portfolioForm, client: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Client Name</label>
+                <input type="text" value={portfolioForm.client} onChange={e=>setPortfolioForm({...portfolioForm, client: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Description</label>
-                <textarea rows={3} required value={portfolioForm.description} onChange={e=>setPortfolioForm({...portfolioForm, description: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Description</label>
+                <textarea rows={3} required value={portfolioForm.description} onChange={e=>setPortfolioForm({...portfolioForm, description: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Key Business Impact</label>
-                <input type="text" value={portfolioForm.impact} onChange={e=>setPortfolioForm({...portfolioForm, impact: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Key Business Impact</label>
+                <input type="text" value={portfolioForm.impact} onChange={e=>setPortfolioForm({...portfolioForm, impact: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
             </>
           )}
@@ -1027,50 +1189,50 @@ export const MasterAdmin = () => {
           {modalType === 'team' && (
             <>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Full Name</label>
-                <input type="text" required value={teamForm.name} onChange={e=>setTeamForm({...teamForm, name: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name</label>
+                <input type="text" required value={teamForm.name} onChange={e=>setTeamForm({...teamForm, name: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Role / Title (e.g. CEO, CTO)</label>
-                <input type="text" required value={teamForm.role} onChange={e=>setTeamForm({...teamForm, role: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Role / Title (e.g. CEO, CTO)</label>
+                <input type="text" required value={teamForm.role} onChange={e=>setTeamForm({...teamForm, role: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               
               {/* Profile Picture Upload & Atlas Storage */}
-              <div className="p-4 rounded-xl bg-dark-850 border border-gold-500/30 space-y-3">
-                <label className="block text-xs font-semibold text-gold-300 uppercase">Profile Picture (Stored in MongoDB Atlas)</label>
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-300 space-y-3">
+                <label className="block text-xs font-bold text-slate-700 uppercase">Profile Picture (Stored in MongoDB Atlas)</label>
                 <div className="flex items-center gap-4">
                   {teamForm.avatar ? (
-                    <img src={teamForm.avatar} alt="Preview" className="w-14 h-14 rounded-full object-cover border-2 border-gold-400 shadow-gold-glow flex-shrink-0" />
+                    <img src={teamForm.avatar} alt="Preview" className="w-14 h-14 rounded-full object-cover border-2 border-gold-400 shadow-sm flex-shrink-0" />
                   ) : (
-                    <div className="w-14 h-14 rounded-full bg-dark-950 border border-gold-500/30 flex items-center justify-center text-gold-300 font-bold text-lg flex-shrink-0">
+                    <div className="w-14 h-14 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-800 font-bold text-lg flex-shrink-0">
                       {teamForm.initials || 'IMG'}
                     </div>
                   )}
                   <div className="space-y-1.5 flex-grow">
-                    <span className="text-[11px] text-gray-400 block">Choose image file from computer (Auto-converts for Atlas storage):</span>
+                    <span className="text-[11px] text-slate-600 block">Choose image file from computer (Auto-converts for Atlas storage):</span>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handleAvatarFileUpload}
-                      className="text-xs text-gray-300 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-gold-500/20 file:text-gold-300 hover:file:bg-gold-500/30"
+                      className="text-xs text-slate-700 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-gold-100 file:text-gold-800 hover:file:bg-gold-200"
                     />
                   </div>
                 </div>
                 <div>
-                  <span className="text-[11px] text-gray-400 block mb-1">Or enter direct Image URL:</span>
+                  <span className="text-[11px] text-slate-600 block mb-1">Or enter direct Image URL:</span>
                   <input
                     type="text"
                     placeholder="https://images.unsplash.com/photo-..."
                     value={teamForm.avatar}
                     onChange={e => setTeamForm({ ...teamForm, avatar: e.target.value })}
-                    className="w-full px-4 py-2 rounded-xl bg-dark-900 border border-gold-500/20 text-white text-xs"
+                    className="w-full px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Bio Description</label>
-                <textarea rows={2} required value={teamForm.bio} onChange={e=>setTeamForm({...teamForm, bio: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Bio Description</label>
+                <textarea rows={2} required value={teamForm.bio} onChange={e=>setTeamForm({...teamForm, bio: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
             </>
           )}
@@ -1079,27 +1241,84 @@ export const MasterAdmin = () => {
           {modalType === 'testimonial' && (
             <>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Client Name</label>
-                <input type="text" required value={testimonialForm.name} onChange={e=>setTestimonialForm({...testimonialForm, name: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Client Name</label>
+                <input type="text" required value={testimonialForm.name} onChange={e=>setTestimonialForm({...testimonialForm, name: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Role & Company</label>
-                <input type="text" required value={testimonialForm.role} onChange={e=>setTestimonialForm({...testimonialForm, role: e.target.value})} placeholder="e.g. VP of Technology" className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm mb-2" />
-                <input type="text" required value={testimonialForm.company} onChange={e=>setTestimonialForm({...testimonialForm, company: e.target.value})} placeholder="e.g. Apex Global" className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Role & Company</label>
+                <input type="text" required value={testimonialForm.role} onChange={e=>setTestimonialForm({...testimonialForm, role: e.target.value})} placeholder="e.g. VP of Technology" className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm mb-2" />
+                <input type="text" required value={testimonialForm.company} onChange={e=>setTestimonialForm({...testimonialForm, company: e.target.value})} placeholder="e.g. Apex Global" className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Review Content</label>
-                <textarea rows={3} required value={testimonialForm.content} onChange={e=>setTestimonialForm({...testimonialForm, content: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Review Content</label>
+                <textarea rows={3} required value={testimonialForm.content} onChange={e=>setTestimonialForm({...testimonialForm, content: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
               </div>
             </>
           )}
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-dark-800">
-            <button type="button" onClick={()=>setModalOpen(false)} className="px-4 py-2 rounded-xl bg-dark-800 text-gray-300 text-xs font-semibold">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+            <button type="button" onClick={()=>setModalOpen(false)} className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">
               Cancel
             </button>
-            <button type="submit" className="px-6 py-2 rounded-xl bg-gold-gradient text-dark-950 text-xs font-bold uppercase tracking-widest shadow-gold-glow">
+            <button type="submit" className="px-6 py-2 rounded-xl bg-gold-gradient text-slate-950 text-xs font-bold uppercase tracking-widest shadow-md">
               Save Item
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* ----------------- ADD ADMIN MEMBER MODAL (OWNER ONLY) ----------------- */}
+      <Modal isOpen={memberModalOpen} onClose={() => setMemberModalOpen(false)} title="👑 Add New Admin Access Member">
+        <form onSubmit={handleAddMember} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Member Full Name</label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Durai Rajan G"
+              value={newMemberForm.name}
+              onChange={e => setNewMemberForm({ ...newMemberForm, name: e.target.value })}
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Assign Username</label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. durai_admin"
+              value={newMemberForm.username}
+              onChange={e => setNewMemberForm({ ...newMemberForm, username: e.target.value })}
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Assign Login Password</label>
+            <input
+              type="password"
+              required
+              placeholder="Assign a secure password"
+              value={newMemberForm.password}
+              onChange={e => setNewMemberForm({ ...newMemberForm, password: e.target.value })}
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:border-gold-500 focus:outline-none"
+            />
+          </div>
+
+          {memberError && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-red-600 flex-shrink-0" />
+              <span>{memberError}</span>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+            <button type="button" onClick={() => setMemberModalOpen(false)} className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">
+              Cancel
+            </button>
+            <button type="submit" className="px-6 py-2 rounded-xl bg-gold-gradient text-slate-950 text-xs font-bold uppercase tracking-widest shadow-md">
+              Create Admin Access
             </button>
           </div>
         </form>

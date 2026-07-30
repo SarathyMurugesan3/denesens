@@ -23,16 +23,16 @@ export const Products = () => {
   }, []);
 
   return (
-    <div className="pt-28 pb-20 min-h-screen bg-dark-900 text-gray-200">
+    <div className="pt-28 pb-20 min-h-screen bg-white text-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-semibold tracking-widest uppercase text-gold-400">PROPRIETARY SAAS ECOSYSTEM</span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-white">
+          <span className="text-xs font-bold tracking-widest uppercase text-gold-700">PROPRIETARY SAAS ECOSYSTEM</span>
+          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-slate-900">
             In-House SaaS & Automation Tools
           </h1>
-          <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-medium">
             Discover Denesens Solutions' turnkey enterprise products—built for autonomous knowledge management, DevOps observability, and zero-trust API protection.
           </p>
         </div>

@@ -30,16 +30,16 @@ export const Services = () => {
     : services.filter(s => s.category === activeCategory);
 
   return (
-    <div className="pt-28 pb-20 min-h-screen bg-dark-900 text-gray-200">
+    <div className="pt-28 pb-20 min-h-screen bg-white text-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-semibold tracking-widest uppercase text-gold-400">OUR SERVICE OFFERINGS</span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-white">
+          <span className="text-xs font-bold tracking-widest uppercase text-gold-700">OUR SERVICE OFFERINGS</span>
+          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-slate-900">
             Custom Software & Technology Consulting
           </h1>
-          <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-medium">
             We deliver tailored digital products across enterprise software development, intelligent AI engines, cloud DevOps, and strategic IT advisory.
           </p>
         </div>
@@ -50,10 +50,10 @@ export const Services = () => {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`text-xs font-semibold uppercase tracking-wider px-5 py-2.5 rounded-xl border transition-all ${
+              className={`text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-xl border transition-all ${
                 activeCategory === cat
-                  ? 'bg-gold-gradient text-dark-950 border-gold-400 font-bold shadow-gold-glow'
-                  : 'bg-dark-850 text-gray-300 border-dark-700 hover:border-gold-500/40 hover:text-white'
+                  ? 'bg-gold-gradient text-slate-950 border-gold-400 shadow-md'
+                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-gold-400 hover:text-slate-900'
               }`}
             >
               {cat}

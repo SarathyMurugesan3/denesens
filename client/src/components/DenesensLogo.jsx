@@ -12,14 +12,12 @@ export const DenesensLogo = ({ size = 'medium', showText = true, className = '' 
     <div className={`flex items-center gap-3 select-none ${className}`}>
       {/* Round Gold Logo Emblem */}
       <div className="relative group cursor-pointer flex-shrink-0">
-        <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-gold-300 via-gold-400 to-gold-600 opacity-50 blur-sm group-hover:opacity-100 transition duration-500"></div>
-        <div className={`relative rounded-full overflow-hidden border-2 border-gold-400/60 p-0.5 bg-dark-950 shadow-gold-glow flex items-center justify-center ${sizeClasses[size] || 'h-10'} aspect-square`}>
+        <div className={`relative rounded-full overflow-hidden border-2 border-gold-400 p-0.5 bg-white shadow-sm flex items-center justify-center ${sizeClasses[size] || 'h-10'} aspect-square`}>
           <img 
             src="/logo.jpg" 
             alt="Denesens Solutions Logo" 
             className="w-full h-full rounded-full object-cover"
             onError={(e) => {
-              // Render fallback circular logo icon if image file is not found
               e.target.style.display = 'none';
             }}
           />
@@ -28,10 +26,10 @@ export const DenesensLogo = ({ size = 'medium', showText = true, className = '' 
 
       {showText && (
         <div className="flex flex-col">
-          <span className="font-heading font-extrabold tracking-[0.25em] text-white text-lg sm:text-xl leading-none">
+          <span className="font-heading font-extrabold tracking-[0.25em] text-slate-900 text-lg sm:text-xl leading-none">
             DENESENS
           </span>
-          <span className="font-heading text-[9px] sm:text-[10px] tracking-[0.3em] text-gold-400 uppercase font-semibold mt-1">
+          <span className="font-heading text-[9px] sm:text-[10px] tracking-[0.3em] text-gold-600 uppercase font-bold mt-1">
             BUILDING INTELLIGENT SOLUTIONS
           </span>
         </div>
