@@ -21,6 +21,10 @@ const ProductSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  fullDetails: {
+    type: String,
+    default: ''
+  },
   features: [{
     type: String
   }],

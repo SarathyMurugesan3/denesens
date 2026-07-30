@@ -10,7 +10,8 @@ let fallbackProducts = [
     name: 'Denesens Intelligence Engine (DIE)',
     slug: 'intelligence-engine',
     tagline: 'Autonomous Workflow & Knowledge Orchestration Platform',
-    description: 'An enterprise AI platform that ingests multi-format internal documents, connects to corporate APIs, and delivers context-aware generative insights with strict data residency controls.',
+    description: 'An enterprise AI platform that ingests multi-format internal documents, connects to corporate APIs, and delivers context-aware generative insights.',
+    fullDetails: 'The Denesens Intelligence Engine (DIE) combines high-throughput vector retrieval with custom LLM orchestration. Designed for zero-trust enterprise environments, DIE features end-to-end data encryption, real-time agent observability, role-based document access controls, and custom fine-tuning modules tailored for healthcare, finance, and legal compliance.',
     features: ['RAG Vector Search Engine', 'Multi-tenant Access Control', 'Custom AI Agent Builder', 'Real-Time Telemetry'],
     techStack: ['Python', 'FastAPI', 'Pinecone', 'React', 'TailwindCSS'],
     status: 'Live',
@@ -24,6 +25,7 @@ let fallbackProducts = [
     slug: 'cloud-pulse',
     tagline: 'Automated Infrastructure Performance & Cost Sentinel',
     description: 'Real-time observability and predictive cloud spend optimization platform for multi-cloud Kubernetes clusters.',
+    fullDetails: 'Denesens Cloud Pulse delivers automated Kubernetes pod autoscaling, anomaly detection, and unified infrastructure metrics. Powered by eBPF kernel tracing and Prometheus metrics, Cloud Pulse monitors CPU/memory drift, prevents node starvation, and automatically suggests resource rightsizing.',
     features: ['Anomalous Spend Alerts', 'Kubernetes Pod Auto-scaler', 'Security Threat Detection', 'One-Click Compliance Reporting'],
     techStack: ['Node.js', 'Go', 'Prometheus', 'Grafana', 'MongoDB'],
     status: 'Live',
@@ -37,6 +39,7 @@ let fallbackProducts = [
     slug: 'sentinel-shield',
     tagline: 'Zero-Trust API Security & Rate-Limit Middleware Suite',
     description: 'A lightweight microservices security gatekeeper offering instantaneous DDOS protection, JWT validation, and automated bot mitigation.',
+    fullDetails: 'Sentinel Shield runs as a high-performance Wasm micro-proxy deployed in front of modern web services. It intercepts API traffic at sub-millisecond speeds, executing dynamic rate limiting, token validation, IP reputation checking, and SQL injection blocking.',
     features: ['Sub-millisecond Middleware Proxy', 'Dynamic IP Reputation Filtering', 'OAuth2 / OIDC Federation', 'Audit Trail Analytics'],
     techStack: ['Rust', 'Express.js', 'Redis', 'WebAssembly'],
     status: 'Beta',
@@ -83,10 +86,10 @@ router.get('/:slug', async (req, res) => {
 // POST /api/products - Create a new product
 router.post('/', adminAuth, async (req, res) => {
   try {
-    const { name, slug, tagline, description, features, techStack, status, demoUrl, badge, order } = req.body;
+    const { name, slug, tagline, description, fullDetails, features, techStack, status, demoUrl, badge, order } = req.body;
     let newProduct;
     try {
-      newProduct = new Product({ name, slug, tagline, description, features, techStack, status, demoUrl, badge, order: Number(order) || 0 });
+      newProduct = new Product({ name, slug, tagline, description, fullDetails, features, techStack, status, demoUrl, badge, order: Number(order) || 0 });
       await newProduct.save();
     } catch (dbErr) {
       console.warn('[Product API] Database write failed, fallback to in-memory:', dbErr.message);
@@ -96,6 +99,7 @@ router.post('/', adminAuth, async (req, res) => {
         slug, 
         tagline, 
         description, 
+        fullDetails,
         features: Array.isArray(features) ? features : [], 
         techStack: Array.isArray(techStack) ? techStack : [], 
         status, 
@@ -114,7 +118,7 @@ router.post('/', adminAuth, async (req, res) => {
 // PUT /api/products/:id - Update an existing product
 router.put('/:id', adminAuth, async (req, res) => {
   try {
-    const { name, slug, tagline, description, features, techStack, status, demoUrl, badge, order } = req.body;
+    const { name, slug, tagline, description, fullDetails, features, techStack, status, demoUrl, badge, order } = req.body;
     const { id } = req.params;
     let updatedProduct;
     
@@ -122,7 +126,7 @@ router.put('/:id', adminAuth, async (req, res) => {
       if (id.match(/^[0-9a-fA-F]{24}$/)) {
         updatedProduct = await Product.findByIdAndUpdate(
           id,
-          { name, slug, tagline, description, features, techStack, status, demoUrl, badge, order: Number(order) || 0 },
+          { name, slug, tagline, description, fullDetails, features, techStack, status, demoUrl, badge, order: Number(order) || 0 },
           { new: true, runValidators: true }
         );
       }
@@ -139,6 +143,7 @@ router.put('/:id', adminAuth, async (req, res) => {
           slug, 
           tagline, 
           description, 
+          fullDetails,
           features: Array.isArray(features) ? features : [], 
           techStack: Array.isArray(techStack) ? techStack : [], 
           status, 

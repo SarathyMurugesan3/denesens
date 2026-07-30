@@ -257,9 +257,9 @@ export const MasterAdmin = () => {
     } else if (type === 'service') {
       setServiceForm({ title: '', slug: '', category: 'Development', shortDesc: '', fullDesc: '', featuresText: '', icon: 'Code', tagsText: '', order: services.length + 1 });
     } else if (type === 'product') {
-      setProductForm({ name: '', slug: '', tagline: '', description: '', featuresText: '', techStackText: '', status: 'Live', demoUrl: '#', badge: 'Enterprise SaaS', order: products.length + 1 });
+      setProductForm({ name: '', slug: '', tagline: '', description: '', fullDetails: '', featuresText: '', techStackText: '', status: 'Live', demoUrl: '#', badge: 'Enterprise SaaS', order: products.length + 1 });
     } else if (type === 'portfolio') {
-      setPortfolioForm({ title: '', slug: '', category: 'AI & Data Science', client: '', description: '', impact: '', tagsText: '', liveUrl: '#', order: portfolio.length + 1 });
+      setPortfolioForm({ title: '', slug: '', category: 'AI & Data Science', client: '', description: '', overview: '', challenge: '', solution: '', impact: '', tagsText: '', liveUrl: '#', order: portfolio.length + 1 });
     } else if (type === 'team') {
       setTeamForm({ name: '', role: '', bio: '', initials: '', avatar: '', linkedin: '', twitter: '', github: '', order: team.length + 1 });
     } else if (type === 'testimonial') {
@@ -293,6 +293,7 @@ export const MasterAdmin = () => {
         slug: item.slug || '',
         tagline: item.tagline || '',
         description: item.description || '',
+        fullDetails: item.fullDetails || '',
         featuresText: item.features ? item.features.join('\n') : '',
         techStackText: item.techStack ? item.techStack.join(', ') : '',
         status: item.status || 'Live',
@@ -307,6 +308,9 @@ export const MasterAdmin = () => {
         category: item.category || 'AI & Data Science',
         client: item.client || '',
         description: item.description || '',
+        overview: item.overview || '',
+        challenge: item.challenge || '',
+        solution: item.solution || '',
         impact: item.impact || '',
         tagsText: item.tags ? item.tags.join(', ') : '',
         liveUrl: item.liveUrl || '#',
@@ -1243,17 +1247,51 @@ export const MasterAdmin = () => {
           {/* PRODUCT FORM */}
           {modalType === 'product' && (
             <>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Product Name</label>
-                <input type="text" required value={productForm.name} onChange={e=>setProductForm({...productForm, name: e.target.value, slug: generateSlug(e.target.value)})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Product Name *</label>
+                  <input type="text" required value={productForm.name} onChange={e=>setProductForm({...productForm, name: e.target.value, slug: generateSlug(e.target.value)})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Badge (e.g. Enterprise SaaS)</label>
+                  <input type="text" value={productForm.badge} onChange={e=>setProductForm({...productForm, badge: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Tagline</label>
-                <input type="text" required value={productForm.tagline} onChange={e=>setProductForm({...productForm, tagline: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Tagline *</label>
+                <input type="text" required value={productForm.tagline} onChange={e=>setProductForm({...productForm, tagline: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Description</label>
-                <textarea rows={3} required value={productForm.description} onChange={e=>setProductForm({...productForm, description: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Short Summary *</label>
+                <textarea rows={2} required value={productForm.description} onChange={e=>setProductForm({...productForm, description: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Full Platform Architecture Specs & Details *</label>
+                <textarea rows={4} value={productForm.fullDetails} onChange={e=>setProductForm({...productForm, fullDetails: e.target.value})} placeholder="Detailed breakdown of platform architecture, modules, security controls, and enterprise capabilities..." className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Key Capabilities (One per line)</label>
+                  <textarea rows={3} value={productForm.featuresText} onChange={e=>setProductForm({...productForm, featuresText: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Tech Stack Tags (Comma separated)</label>
+                  <textarea rows={3} value={productForm.techStackText} onChange={e=>setProductForm({...productForm, techStackText: e.target.value})} placeholder="Python, FastAPI, React, Docker..." className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Status</label>
+                  <select value={productForm.status} onChange={e=>setProductForm({...productForm, status: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-bold">
+                    <option value="Live">Live</option>
+                    <option value="Beta">Beta</option>
+                    <option value="Coming Soon">Coming Soon</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Demo Link / Try Platform URL</label>
+                  <input type="text" value={productForm.demoUrl} onChange={e=>setProductForm({...productForm, demoUrl: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
               </div>
             </>
           )}
@@ -1261,21 +1299,53 @@ export const MasterAdmin = () => {
           {/* PORTFOLIO FORM */}
           {modalType === 'portfolio' && (
             <>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Case Study Title</label>
-                <input type="text" required value={portfolioForm.title} onChange={e=>setPortfolioForm({...portfolioForm, title: e.target.value, slug: generateSlug(e.target.value)})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Case Study Title *</label>
+                  <input type="text" required value={portfolioForm.title} onChange={e=>setPortfolioForm({...portfolioForm, title: e.target.value, slug: generateSlug(e.target.value)})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Client Name</label>
+                  <input type="text" value={portfolioForm.client} onChange={e=>setPortfolioForm({...portfolioForm, client: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Category</label>
+                  <input type="text" value={portfolioForm.category} onChange={e=>setPortfolioForm({...portfolioForm, category: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Key Business Impact</label>
+                  <input type="text" value={portfolioForm.impact} onChange={e=>setPortfolioForm({...portfolioForm, impact: e.target.value})} placeholder="e.g. Reduced research query speeds by 94%" className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Client Name</label>
-                <input type="text" value={portfolioForm.client} onChange={e=>setPortfolioForm({...portfolioForm, client: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Short Description *</label>
+                <textarea rows={2} required value={portfolioForm.description} onChange={e=>setPortfolioForm({...portfolioForm, description: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Description</label>
-                <textarea rows={3} required value={portfolioForm.description} onChange={e=>setPortfolioForm({...portfolioForm, description: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Full Case Study Overview *</label>
+                <textarea rows={3} value={portfolioForm.overview} onChange={e=>setPortfolioForm({...portfolioForm, overview: e.target.value})} placeholder="Detailed narrative explaining project background and requirements..." className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Key Business Impact</label>
-                <input type="text" value={portfolioForm.impact} onChange={e=>setPortfolioForm({...portfolioForm, impact: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Technical Challenge</label>
+                  <textarea rows={3} value={portfolioForm.challenge} onChange={e=>setPortfolioForm({...portfolioForm, challenge: e.target.value})} placeholder="Problem statement or bottlenecks faced by client..." className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Architectural Solution</label>
+                  <textarea rows={3} value={portfolioForm.solution} onChange={e=>setPortfolioForm({...portfolioForm, solution: e.target.value})} placeholder="Custom engineering architecture delivered by Denesens..." className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Tech Stack Tags (Comma separated)</label>
+                  <input type="text" value={portfolioForm.tagsText} onChange={e=>setPortfolioForm({...portfolioForm, tagsText: e.target.value})} placeholder="Python, FastAPI, React..." className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Live Case Link</label>
+                  <input type="text" value={portfolioForm.liveUrl} onChange={e=>setPortfolioForm({...portfolioForm, liveUrl: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
               </div>
             </>
           )}
@@ -1332,21 +1402,49 @@ export const MasterAdmin = () => {
             </>
           )}
 
-          {/* TESTIMONIAL FORM */}
+          {/* TESTIMONIAL FORM WITH INTERACTIVE STAR RATING SELECTOR */}
           {modalType === 'testimonial' && (
             <>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Client Name</label>
-                <input type="text" required value={testimonialForm.name} onChange={e=>setTestimonialForm({...testimonialForm, name: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Client Name *</label>
+                <input type="text" required value={testimonialForm.name} onChange={e=>setTestimonialForm({...testimonialForm, name: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Role & Company</label>
-                <input type="text" required value={testimonialForm.role} onChange={e=>setTestimonialForm({...testimonialForm, role: e.target.value})} placeholder="e.g. VP of Technology" className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm mb-2" />
-                <input type="text" required value={testimonialForm.company} onChange={e=>setTestimonialForm({...testimonialForm, company: e.target.value})} placeholder="e.g. Apex Global" className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Client Role *</label>
+                  <input type="text" required value={testimonialForm.role} onChange={e=>setTestimonialForm({...testimonialForm, role: e.target.value})} placeholder="e.g. VP of Technology" className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Company / Organization *</label>
+                  <input type="text" required value={testimonialForm.company} onChange={e=>setTestimonialForm({...testimonialForm, company: e.target.value})} placeholder="e.g. Apex Global" className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
+                </div>
               </div>
+
+              {/* ⭐ Interactive Star Rating Selector (1-5 Stars) */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase">⭐ Select Star Rating ({testimonialForm.rating} of 5 Stars)</label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((starNum) => (
+                    <button
+                      key={starNum}
+                      type="button"
+                      onClick={() => setTestimonialForm({ ...testimonialForm, rating: starNum })}
+                      className={`p-2 rounded-xl border transition-all flex items-center gap-1 text-xs font-bold ${
+                        testimonialForm.rating >= starNum
+                          ? 'bg-gold-100 border-gold-400 text-gold-700 shadow-sm'
+                          : 'bg-white border-slate-300 text-slate-400 hover:border-gold-300'
+                      }`}
+                    >
+                      <Star className={`w-5 h-5 ${testimonialForm.rating >= starNum ? 'fill-gold-500 text-gold-500' : 'text-slate-300'}`} />
+                      <span>{starNum}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Review Content</label>
-                <textarea rows={3} required value={testimonialForm.content} onChange={e=>setTestimonialForm({...testimonialForm, content: e.target.value})} className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm" />
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Review Content *</label>
+                <textarea rows={4} required value={testimonialForm.content} onChange={e=>setTestimonialForm({...testimonialForm, content: e.target.value})} placeholder="Enter detailed client recommendation and testimonial text..." className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm font-medium" />
               </div>
             </>
           )}

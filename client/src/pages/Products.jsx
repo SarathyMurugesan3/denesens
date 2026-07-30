@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Cpu, Zap, ArrowRight } from 'lucide-react';
+import { Cpu, Zap, ArrowRight, CheckCircle2, ExternalLink } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import Modal from '../components/Modal';
 import { fetchProducts, subscribeCMSUpdate } from '../services/api';
@@ -44,44 +44,76 @@ export const Products = () => {
           ))}
         </div>
 
-        {/* Product Modal */}
+        {/* Product Details Modal */}
         <Modal
           isOpen={!!selectedProduct}
           onClose={() => setSelectedProduct(null)}
           title={selectedProduct?.name || ''}
         >
           {selectedProduct && (
-            <div className="space-y-6">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-widest text-gold-400 bg-gold-500/10 px-3 py-1 rounded border border-gold-500/20">
+            <div className="space-y-6 text-slate-800">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3 flex-wrap gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-gold-800 bg-gold-100 px-3 py-1 rounded-full border border-gold-400/30">
                   {selectedProduct.badge}
                 </span>
-                <p className="text-sm text-gold-300 font-semibold mt-2">{selectedProduct.tagline}</p>
+                <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
+                  selectedProduct.status === 'Live' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
+                }`}>
+                  Status: {selectedProduct.status}
+                </span>
               </div>
 
-              <p className="text-gray-300 text-sm leading-relaxed">
-                {selectedProduct.description}
-              </p>
+              <div>
+                <p className="text-sm font-bold text-slate-900 font-heading">{selectedProduct.tagline}</p>
+                <p className="text-xs text-slate-600 leading-relaxed font-medium mt-1">
+                  {selectedProduct.description}
+                </p>
+              </div>
 
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Key Capabilities:</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {selectedProduct.features?.map((f, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs text-gray-300 bg-dark-900 p-2.5 rounded border border-dark-700">
-                      <Zap className="w-3.5 h-3.5 text-gold-400 shrink-0" />
-                      <span>{f}</span>
-                    </div>
-                  ))}
+              {selectedProduct.fullDetails && (
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                  <h4 className="text-xs font-bold text-gold-700 uppercase tracking-wider">Full Platform Architecture & Technical Breakdown</h4>
+                  <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                    {selectedProduct.fullDetails}
+                  </p>
                 </div>
-              </div>
+              )}
 
-              <div className="pt-4 border-t border-dark-700 flex justify-end">
+              {selectedProduct.features && selectedProduct.features.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Key Enterprise Capabilities</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {selectedProduct.features.map((f, i) => (
+                      <div key={i} className="flex items-center gap-2.5 text-xs font-medium text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-200 shadow-sm">
+                        <Zap className="w-4 h-4 text-gold-600 shrink-0" />
+                        <span>{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedProduct.techStack && selectedProduct.techStack.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Core Tech Stack</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProduct.techStack.map((tech, idx) => (
+                      <span key={idx} className="text-[10px] font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-4 border-t border-slate-200 flex justify-end gap-3">
                 <Link
                   to="/contact"
                   onClick={() => setSelectedProduct(null)}
-                  className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-dark-950 bg-gold-gradient rounded-xl shadow-gold-glow"
+                  className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-slate-950 bg-gold-gradient rounded-xl shadow-md hover:bg-gold-gradient-hover transition-all inline-flex items-center gap-2"
                 >
-                  Schedule Demo & Trial
+                  <span>Request Demo & Enterprise License</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>

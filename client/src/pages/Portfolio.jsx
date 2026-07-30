@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, ArrowUpRight, CheckCircle2 } from 'lucide-react';
+import { Briefcase, ArrowUpRight, CheckCircle2, ShieldCheck, Cpu, ExternalLink } from 'lucide-react';
 import Modal from '../components/Modal';
-import { Link } from 'react-router-dom';
 import { fetchPortfolio, subscribeCMSUpdate } from '../services/api';
 
 export const Portfolio = () => {
@@ -117,14 +116,81 @@ export const Portfolio = () => {
           ))}
         </div>
 
-        {/* Modal Case Study Overview */}
+        {/* Rich Modal Case Study Overview */}
         {selectedCaseStudy && (
           <Modal isOpen={!!selectedCaseStudy} onClose={() => setSelectedCaseStudy(null)} title={selectedCaseStudy.title}>
-            <div className="space-y-4 text-slate-700">
-              <p className="text-sm leading-relaxed font-medium">{selectedCaseStudy.description}</p>
+            <div className="space-y-6 text-slate-700">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3 flex-wrap gap-2">
+                <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-gold-100 text-gold-800 border border-gold-400/30">
+                  {selectedCaseStudy.category}
+                </span>
+                {selectedCaseStudy.client && (
+                  <span className="text-xs font-bold text-slate-500">Client: {selectedCaseStudy.client}</span>
+                )}
+              </div>
+
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-gold-700 mb-1">Executive Summary</h4>
+                <p className="text-sm leading-relaxed font-medium text-slate-800">{selectedCaseStudy.description}</p>
+              </div>
+
+              {selectedCaseStudy.overview && (
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-gold-700 mb-1">Full Project Overview</h4>
+                  <p className="text-xs leading-relaxed font-medium text-slate-700 bg-slate-50 p-4 rounded-2xl border border-slate-200">{selectedCaseStudy.overview}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {selectedCaseStudy.challenge && (
+                  <div className="p-4 rounded-2xl bg-red-50/50 border border-red-200 space-y-1">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-red-700">Technical Challenge</h4>
+                    <p className="text-xs leading-relaxed text-slate-700 font-medium">{selectedCaseStudy.challenge}</p>
+                  </div>
+                )}
+
+                {selectedCaseStudy.solution && (
+                  <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-1">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-700">Architectural Solution Delivered</h4>
+                    <p className="text-xs leading-relaxed text-slate-700 font-medium">{selectedCaseStudy.solution}</p>
+                  </div>
+                )}
+              </div>
+
               {selectedCaseStudy.impact && (
-                <div className="p-4 rounded-xl bg-gold-50 border border-gold-300 text-xs font-bold text-gold-800">
-                  Impact: {selectedCaseStudy.impact}
+                <div className="p-4 rounded-2xl bg-gold-50 border border-gold-300 text-xs font-bold text-gold-800 flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-gold-600 flex-shrink-0" />
+                  <div>
+                    <span className="block text-[10px] uppercase font-bold text-gold-700">Business Impact</span>
+                    <span>{selectedCaseStudy.impact}</span>
+                  </div>
+                </div>
+              )}
+
+              {selectedCaseStudy.tags && selectedCaseStudy.tags.length > 0 && (
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Technologies Deployed</span>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCaseStudy.tags.map((tag, idx) => (
+                      <span key={idx} className="text-[10px] font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedCaseStudy.liveUrl && selectedCaseStudy.liveUrl !== '#' && (
+                <div className="pt-4 border-t border-slate-200 flex justify-end">
+                  <a
+                    href={selectedCaseStudy.liveUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-5 py-2.5 rounded-xl bg-gold-gradient text-slate-950 text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 shadow-md"
+                  >
+                    <span>Visit Live Case Study</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
                 </div>
               )}
             </div>
