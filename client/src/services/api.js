@@ -71,10 +71,47 @@ export const fetchTeam = async () => {
 export const applyThemeToDOM = (settings) => {
   if (typeof document === 'undefined' || !settings) return;
   const root = document.documentElement;
+
+  // Set default data attributes
   root.setAttribute('data-theme-bg', settings.themeBg || 'white');
   root.setAttribute('data-font', settings.fontFamily || 'outfit');
   root.setAttribute('data-accent', settings.accentColor || 'gold');
   root.setAttribute('data-radius', settings.cardRadius || 'rounded-3xl');
+
+  // Override root CSS variables with granular custom pickers if present
+  if (settings.customBgColor) root.style.setProperty('--theme-bg-main', settings.customBgColor);
+  if (settings.customCardColor) root.style.setProperty('--theme-bg-card', settings.customCardColor);
+  if (settings.customTextColor) root.style.setProperty('--theme-text-main', settings.customTextColor);
+  if (settings.customSubtextColor) root.style.setProperty('--theme-text-sub', settings.customSubtextColor);
+  if (settings.customAccentColor) {
+    root.style.setProperty('--accent-main', settings.customAccentColor);
+    root.style.setProperty('--accent-dark', settings.customAccentColor);
+  }
+  if (settings.customBorderColor) root.style.setProperty('--theme-border', settings.customBorderColor);
+
+  if (settings.headingFont) {
+    const headingFontMap = {
+      'Outfit': "'Outfit', sans-serif",
+      'Playfair Display': "'Playfair Display', serif",
+      'Montserrat': "'Montserrat', sans-serif",
+      'Sora': "'Sora', sans-serif",
+      'Poppins': "'Poppins', sans-serif",
+      'Roboto': "'Roboto', sans-serif",
+      'Inter': "'Inter', sans-serif"
+    };
+    root.style.setProperty('--theme-font-heading', headingFontMap[settings.headingFont] || settings.headingFont);
+  }
+
+  if (settings.bodyFont) {
+    const bodyFontMap = {
+      'Inter': "'Inter', sans-serif",
+      'Roboto': "'Roboto', sans-serif",
+      'Work Sans': "'Work Sans', sans-serif",
+      'Plus Jakarta Sans': "'Plus Jakarta Sans', sans-serif",
+      'Cormorant Garamond': "'Cormorant Garamond', serif"
+    };
+    root.style.setProperty('--theme-font-body', bodyFontMap[settings.bodyFont] || settings.bodyFont);
+  }
 };
 
 export const fetchSettings = async () => {

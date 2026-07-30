@@ -52,6 +52,14 @@ export const MasterAdmin = () => {
     fontFamily: 'outfit',
     accentColor: 'gold',
     cardRadius: 'rounded-3xl',
+    customBgColor: '#FFFFFF',
+    customCardColor: '#F8FAFC',
+    customTextColor: '#0F172A',
+    customSubtextColor: '#475569',
+    customAccentColor: '#D4AF37',
+    customBorderColor: '#E2E8F0',
+    headingFont: 'Outfit',
+    bodyFont: 'Inter',
     socialLinks: {
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com',
@@ -636,7 +644,7 @@ export const MasterAdmin = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* 1. Section Background Mode */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Section Background Mode</label>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Section Background Theme Mode</label>
                     <select
                       value={settings.themeBg || 'white'}
                       onChange={(e) => {
@@ -653,47 +661,7 @@ export const MasterAdmin = () => {
                     </select>
                   </div>
 
-                  {/* 2. Typography & Font Family */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Typography & Font Family</label>
-                    <select
-                      value={settings.fontFamily || 'outfit'}
-                      onChange={(e) => {
-                        const updated = { ...settings, fontFamily: e.target.value };
-                        setSettings(updated);
-                        applyThemeToDOM(updated);
-                      }}
-                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-bold focus:border-gold-500"
-                    >
-                      <option value="outfit">Outfit & Inter (Modern Tech)</option>
-                      <option value="playfair">Playfair Display & Garamond (Luxury Serif)</option>
-                      <option value="montserrat">Montserrat & Roboto (Clean Corporate)</option>
-                      <option value="sora">Sora & Plus Jakarta Sans (Futuristic AI)</option>
-                      <option value="poppins">Poppins & Work Sans (Friendly Modern)</option>
-                    </select>
-                  </div>
-
-                  {/* 3. Accent Theme Color */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Primary Accent Theme Color</label>
-                    <select
-                      value={settings.accentColor || 'gold'}
-                      onChange={(e) => {
-                        const updated = { ...settings, accentColor: e.target.value };
-                        setSettings(updated);
-                        applyThemeToDOM(updated);
-                      }}
-                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-bold focus:border-gold-500"
-                    >
-                      <option value="gold">Metallic Gold (#D4AF37)</option>
-                      <option value="amber">Amber Bronze (#D97706)</option>
-                      <option value="emerald">Emerald Jade (#059669)</option>
-                      <option value="sapphire">Sapphire Blue (#2563EB)</option>
-                      <option value="purple">Amethyst Purple (#7C3AED)</option>
-                    </select>
-                  </div>
-
-                  {/* 4. Card Border Radius */}
+                  {/* 2. Card Style & Border Radius */}
                   <div>
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Card Style & Border Radius</label>
                     <select
@@ -709,6 +677,254 @@ export const MasterAdmin = () => {
                       <option value="rounded-xl">Modern Rounded (12px - rounded-xl)</option>
                       <option value="rounded-md">Executive Sharp (6px - rounded-md)</option>
                     </select>
+                  </div>
+                </div>
+
+                {/* 🎨 Granular Individual Color Pickers */}
+                <div className="pt-4 border-t border-slate-200 space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-900">🎨 Granular Section & Card Hex Color Pickers</h4>
+                    
+                    {/* Quick Preset Buttons */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase">Quick Presets:</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const p = { ...settings, themeBg: 'white', customBgColor: '#FFFFFF', customCardColor: '#F8FAFC', customTextColor: '#0F172A', customSubtextColor: '#475569', customAccentColor: '#D4AF37', customBorderColor: '#E2E8F0' };
+                          setSettings(p); applyThemeToDOM(p);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-[10px] font-bold text-slate-800 shadow-sm"
+                      >
+                        White Gold
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const p = { ...settings, themeBg: 'slate', customBgColor: '#F1F5F9', customCardColor: '#FFFFFF', customTextColor: '#0F172A', customSubtextColor: '#334155', customAccentColor: '#2563EB', customBorderColor: '#CBD5E1' };
+                          setSettings(p); applyThemeToDOM(p);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-300 text-[10px] font-bold text-blue-700 shadow-sm"
+                      >
+                        Slate Blue
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const p = { ...settings, themeBg: 'pearl', customBgColor: '#FAF9F6', customCardColor: '#FFFFFF', customTextColor: '#1C1917', customSubtextColor: '#44403C', customAccentColor: '#D97706', customBorderColor: '#E7E5E4' };
+                          setSettings(p); applyThemeToDOM(p);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-300 text-[10px] font-bold text-amber-800 shadow-sm"
+                      >
+                        Warm Pearl
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const p = { ...settings, themeBg: 'obsidian', customBgColor: '#0A0E17', customCardColor: '#111827', customTextColor: '#F8FAFC', customSubtextColor: '#94A3B8', customAccentColor: '#D4AF37', customBorderColor: '#374151' };
+                          setSettings(p); applyThemeToDOM(p);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-[10px] font-bold text-gold-400 shadow-sm"
+                      >
+                        Dark Obsidian
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {/* Section Background Color */}
+                    <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase">Section Main Background</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.customBgColor || '#FFFFFF'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customBgColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-9 h-9 rounded-lg border border-slate-300 cursor-pointer p-0.5"
+                        />
+                        <input
+                          type="text"
+                          value={settings.customBgColor || '#FFFFFF'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customBgColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Card Container Color */}
+                    <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase">Card Container Background</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.customCardColor || '#F8FAFC'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customCardColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-9 h-9 rounded-lg border border-slate-300 cursor-pointer p-0.5"
+                        />
+                        <input
+                          type="text"
+                          value={settings.customCardColor || '#F8FAFC'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customCardColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Primary Text & Heading Color */}
+                    <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase">Headings & Primary Text</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.customTextColor || '#0F172A'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customTextColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-9 h-9 rounded-lg border border-slate-300 cursor-pointer p-0.5"
+                        />
+                        <input
+                          type="text"
+                          value={settings.customTextColor || '#0F172A'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customTextColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Secondary Text Color */}
+                    <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase">Subtitles & Body Text</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.customSubtextColor || '#475569'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customSubtextColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-9 h-9 rounded-lg border border-slate-300 cursor-pointer p-0.5"
+                        />
+                        <input
+                          type="text"
+                          value={settings.customSubtextColor || '#475569'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customSubtextColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Brand Accent Highlight Color */}
+                    <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase">Brand Accent Highlight</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.customAccentColor || '#D4AF37'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customAccentColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-9 h-9 rounded-lg border border-slate-300 cursor-pointer p-0.5"
+                        />
+                        <input
+                          type="text"
+                          value={settings.customAccentColor || '#D4AF37'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customAccentColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Card Border Color */}
+                    <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase">Card Borders & Dividers</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.customBorderColor || '#E2E8F0'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customBorderColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-9 h-9 rounded-lg border border-slate-300 cursor-pointer p-0.5"
+                        />
+                        <input
+                          type="text"
+                          value={settings.customBorderColor || '#E2E8F0'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customBorderColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 🔤 Granular Heading & Body Font Family Customization */}
+                <div className="pt-4 border-t border-slate-200 space-y-4">
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-900">🔤 Typography & Font Family Customization</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Heading Font Family</label>
+                      <select
+                        value={settings.headingFont || 'Outfit'}
+                        onChange={(e) => {
+                          const updated = { ...settings, headingFont: e.target.value };
+                          setSettings(updated); applyThemeToDOM(updated);
+                        }}
+                        className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-bold focus:border-gold-500"
+                      >
+                        <option value="Outfit">Outfit (Modern Geometric)</option>
+                        <option value="Playfair Display">Playfair Display (Luxury Editorial Serif)</option>
+                        <option value="Montserrat">Montserrat (Clean Corporate)</option>
+                        <option value="Sora">Sora (Futuristic AI Tech)</option>
+                        <option value="Poppins">Poppins (Friendly Rounded)</option>
+                        <option value="Roboto">Roboto (Classic Professional)</option>
+                        <option value="Inter">Inter (Ultra Clean Swiss)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Body Text Font Family</label>
+                      <select
+                        value={settings.bodyFont || 'Inter'}
+                        onChange={(e) => {
+                          const updated = { ...settings, bodyFont: e.target.value };
+                          setSettings(updated); applyThemeToDOM(updated);
+                        }}
+                        className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-bold focus:border-gold-500"
+                      >
+                        <option value="Inter">Inter (Optimal Reading Density)</option>
+                        <option value="Roboto">Roboto (Clean Sans-Serif)</option>
+                        <option value="Work Sans">Work Sans (Executive Tech)</option>
+                        <option value="Plus Jakarta Sans">Plus Jakarta Sans (Modern UI)</option>
+                        <option value="Cormorant Garamond">Cormorant Garamond (High Fashion Serif)</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>

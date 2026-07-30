@@ -21,6 +21,16 @@ const siteSettingsSchema = new mongoose.Schema({
   accentColor: { type: String, default: 'gold' },
   cardRadius: { type: String, default: 'rounded-3xl' },
 
+  // Granular Section Colors & Fonts
+  customBgColor: { type: String, default: '#FFFFFF' },
+  customCardColor: { type: String, default: '#F8FAFC' },
+  customTextColor: { type: String, default: '#0F172A' },
+  customSubtextColor: { type: String, default: '#475569' },
+  customAccentColor: { type: String, default: '#D4AF37' },
+  customBorderColor: { type: String, default: '#E2E8F0' },
+  headingFont: { type: String, default: 'Outfit' },
+  bodyFont: { type: String, default: 'Inter' },
+
   socialLinks: {
     linkedin: { type: String, default: 'https://linkedin.com' },
     twitter: { type: String, default: 'https://twitter.com' },
