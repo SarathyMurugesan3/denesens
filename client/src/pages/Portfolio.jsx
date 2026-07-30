@@ -3,15 +3,23 @@ import { motion } from 'framer-motion';
 import { Briefcase, ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import Modal from '../components/Modal';
 import { Link } from 'react-router-dom';
-import { fetchPortfolio } from '../services/api';
+import { fetchPortfolio, subscribeCMSUpdate } from '../services/api';
 
 export const Portfolio = () => {
   const [filter, setFilter] = useState('All');
   const [selectedCaseStudy, setSelectedCaseStudy] = useState(null);
   const [caseStudies, setCaseStudies] = useState([]);
 
-  useEffect(() => {
+  const loadData = () => {
     fetchPortfolio().then(res => setCaseStudies(res));
+  };
+
+  useEffect(() => {
+    loadData();
+    const unsubscribe = subscribeCMSUpdate(() => {
+      loadData();
+    });
+    return () => unsubscribe();
   }, []);
 
   const categories = ['All', ...new Set(caseStudies.map(cs => cs.category))];

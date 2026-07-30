@@ -21,6 +21,10 @@ const TeamMemberSchema = new mongoose.Schema({
     uppercase: true,
     maxLength: 3
   },
+  avatar: {
+    type: String,
+    default: '' // Data URI or Atlas Image URL
+  },
   socialLinks: {
     linkedin: { type: String, default: '#' },
     twitter: { type: String, default: '#' },

@@ -3,7 +3,7 @@ const TeamMember = require('../models/TeamMember');
 const adminAuth = require('../middleware/adminAuth');
 const router = express.Router();
 
-// Fallback seed team data
+// Fallback seed team data with high-quality executive avatar images
 let fallbackTeam = [
   {
     _id: 'team-1',
@@ -11,6 +11,7 @@ let fallbackTeam = [
     role: 'CEO',
     bio: 'Visionary leader driving strategic growth, product expansion, and enterprise partnerships at Denesens Solutions.',
     initials: 'SM',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
     socialLinks: {
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com',
@@ -24,6 +25,7 @@ let fallbackTeam = [
     role: 'CTO',
     bio: 'Chief Architect specializing in high-concurrency systems, AI integrations, and cloud infrastructure scalability.',
     initials: 'DS',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
     socialLinks: {
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com',
@@ -37,6 +39,7 @@ let fallbackTeam = [
     role: 'Marketing Lead',
     bio: 'Brand strategist overseeing global client acquisition, digital campaigns, and product marketing initiatives.',
     initials: 'DR',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
     socialLinks: {
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com',
@@ -62,10 +65,10 @@ router.get('/', async (req, res) => {
 // POST /api/team - Create a new team member
 router.post('/', adminAuth, async (req, res) => {
   try {
-    const { name, role, bio, initials, socialLinks, order } = req.body;
+    const { name, role, bio, initials, avatar, socialLinks, order } = req.body;
     let newMember;
     try {
-      newMember = new TeamMember({ name, role, bio, initials, socialLinks, order: Number(order) || 0 });
+      newMember = new TeamMember({ name, role, bio, initials, avatar: avatar || '', socialLinks, order: Number(order) || 0 });
       await newMember.save();
     } catch (dbErr) {
       console.warn('[Team API] Database write failed, fallback to in-memory:', dbErr.message);
@@ -75,6 +78,7 @@ router.post('/', adminAuth, async (req, res) => {
         role, 
         bio, 
         initials, 
+        avatar: avatar || '',
         socialLinks: socialLinks || { linkedin: '#', twitter: '#', github: '#' }, 
         order: Number(order) || 0 
       };
@@ -89,7 +93,7 @@ router.post('/', adminAuth, async (req, res) => {
 // PUT /api/team/:id - Update an existing team member
 router.put('/:id', adminAuth, async (req, res) => {
   try {
-    const { name, role, bio, initials, socialLinks, order } = req.body;
+    const { name, role, bio, initials, avatar, socialLinks, order } = req.body;
     const { id } = req.params;
     let updatedMember;
     
@@ -97,7 +101,7 @@ router.put('/:id', adminAuth, async (req, res) => {
       if (id.match(/^[0-9a-fA-F]{24}$/)) {
         updatedMember = await TeamMember.findByIdAndUpdate(
           id,
-          { name, role, bio, initials, socialLinks, order: Number(order) || 0 },
+          { name, role, bio, initials, avatar, socialLinks, order: Number(order) || 0 },
           { new: true, runValidators: true }
         );
       }
@@ -114,6 +118,7 @@ router.put('/:id', adminAuth, async (req, res) => {
           role, 
           bio, 
           initials, 
+          avatar: avatar !== undefined ? avatar : fallbackTeam[index].avatar,
           socialLinks: socialLinks || fallbackTeam[index].socialLinks, 
           order: Number(order) || 0 
         };

@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ChevronRight, PhoneCall } from 'lucide-react';
 import DenesensLogo from './DenesensLogo';
-import { fetchSettings } from '../services/api';
+import { fetchSettings, subscribeCMSUpdate } from '../services/api';
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -11,9 +11,16 @@ export const Navbar = () => {
   const [phone, setPhone] = useState('+91 96295 68373');
   const location = useLocation();
 
-  useEffect(() => {
+  const loadSettings = () => {
     fetchSettings().then(res => {
       if (res && res.phone) setPhone(res.phone);
+    });
+  };
+
+  useEffect(() => {
+    loadSettings();
+    const unsubscribe = subscribeCMSUpdate(() => {
+      loadSettings();
     });
 
     const handleScroll = () => {
@@ -24,7 +31,10 @@ export const Navbar = () => {
       }
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      unsubscribe();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const navLinks = [

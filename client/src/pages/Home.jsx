@@ -9,7 +9,7 @@ import ServiceCard from '../components/ServiceCard';
 import ProductCard from '../components/ProductCard';
 import Modal from '../components/Modal';
 import { 
-  fetchSettings, fetchStats, fetchServices, fetchProducts, fetchPortfolio, fetchTestimonials, submitContactForm 
+  fetchSettings, fetchStats, fetchServices, fetchProducts, fetchPortfolio, fetchTestimonials, submitContactForm, subscribeCMSUpdate 
 } from '../services/api';
 
 export const Home = () => {
@@ -38,13 +38,21 @@ export const Home = () => {
   });
   const [formStatus, setFormStatus] = useState({ loading: false, success: null, error: null });
 
-  useEffect(() => {
+  const loadData = () => {
     fetchSettings().then(res => { if (res) setSettings(res); });
     fetchStats().then(res => setStats(res));
     fetchServices().then(res => setServices(res.slice(0, 4)));
     fetchProducts().then(res => setProducts(res.slice(0, 2)));
     fetchPortfolio().then(res => setPortfolio(res.slice(0, 3)));
     fetchTestimonials().then(res => setTestimonials(res));
+  };
+
+  useEffect(() => {
+    loadData();
+    const unsubscribe = subscribeCMSUpdate(() => {
+      loadData();
+    });
+    return () => unsubscribe();
   }, []);
 
   const handleQuickSubmit = async (e) => {

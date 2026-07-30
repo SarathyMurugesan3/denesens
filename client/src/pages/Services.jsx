@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
 import ServiceCard from '../components/ServiceCard';
 import Modal from '../components/Modal';
-import { fetchServices } from '../services/api';
+import { fetchServices, subscribeCMSUpdate } from '../services/api';
 import { Link } from 'react-router-dom';
 
 export const Services = () => {
@@ -11,8 +11,16 @@ export const Services = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedService, setSelectedService] = useState(null);
 
-  useEffect(() => {
+  const loadData = () => {
     fetchServices().then(res => setServices(res));
+  };
+
+  useEffect(() => {
+    loadData();
+    const unsubscribe = subscribeCMSUpdate(() => {
+      loadData();
+    });
+    return () => unsubscribe();
   }, []);
 
   const categories = ['All', 'Development', 'Intelligence', 'Infrastructure', 'Design & Strategy'];

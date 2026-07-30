@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Globe, Send, CheckCircle2, AlertCircle, Linkedin, Twitter, Github } from 'lucide-react';
 import GoldOrnament from '../components/GoldOrnament';
-import { submitContactForm, fetchSettings } from '../services/api';
+import { submitContactForm, fetchSettings, subscribeCMSUpdate } from '../services/api';
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
@@ -27,8 +27,16 @@ export const Contact = () => {
 
   const [status, setStatus] = useState({ loading: false, success: null, error: null });
 
-  useEffect(() => {
+  const loadData = () => {
     fetchSettings().then(res => { if (res) setSettings(res); });
+  };
+
+  useEffect(() => {
+    loadData();
+    const unsubscribe = subscribeCMSUpdate(() => {
+      loadData();
+    });
+    return () => unsubscribe();
   }, []);
 
   const handleChange = (e) => {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Target, Compass, Award, Linkedin, Twitter, Github, CheckCircle2, Milestone } from 'lucide-react';
 import GoldOrnament from '../components/GoldOrnament';
-import { fetchTeam, fetchSettings } from '../services/api';
+import { fetchTeam, fetchSettings, subscribeCMSUpdate } from '../services/api';
 
 export const About = () => {
   const [team, setTeam] = useState([]);
@@ -13,9 +13,17 @@ export const About = () => {
     visionText: 'To stand as the global gold standard for luxury tech engineering—recognized for combining deep artificial intelligence, resilient cloud infrastructure, and unmatched visual design polish.'
   });
 
-  useEffect(() => {
+  const loadData = () => {
     fetchTeam().then(res => setTeam(res));
     fetchSettings().then(res => { if (res) setSettings(res); });
+  };
+
+  useEffect(() => {
+    loadData();
+    const unsubscribe = subscribeCMSUpdate(() => {
+      loadData();
+    });
+    return () => unsubscribe();
   }, []);
 
   const milestones = [
@@ -82,11 +90,15 @@ export const About = () => {
                 whileHover={{ y: -8 }}
                 className="p-8 rounded-3xl bg-dark-900 border border-gold-500/30 text-center space-y-6 shadow-xl relative group hover:border-gold-400/60 transition-all duration-300"
               >
-                {/* Round Avatar Frame */}
+                {/* Round Avatar Profile Picture Frame */}
                 <div className="relative w-28 h-28 mx-auto rounded-full bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-300 p-1 shadow-gold-glow">
-                  <div className="w-full h-full rounded-full bg-dark-950 flex items-center justify-center text-gold-300 font-heading font-extrabold text-2xl tracking-wider">
-                    {member.initials}
-                  </div>
+                  {member.avatar ? (
+                    <img src={member.avatar} alt={member.name} className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-dark-950 flex items-center justify-center text-gold-300 font-heading font-extrabold text-2xl tracking-wider">
+                      {member.initials}
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-1">

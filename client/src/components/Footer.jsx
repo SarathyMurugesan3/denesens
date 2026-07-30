@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Globe, Linkedin, Twitter, Github, ArrowUpRight } from 'lucide-react';
 import DenesensLogo from './DenesensLogo';
 import GoldOrnament from './GoldOrnament';
-import { fetchSettings } from '../services/api';
+import { fetchSettings, subscribeCMSUpdate } from '../services/api';
 
 export const Footer = () => {
   const [settings, setSettings] = useState({
@@ -17,8 +17,16 @@ export const Footer = () => {
     }
   });
 
-  useEffect(() => {
+  const loadData = () => {
     fetchSettings().then(res => { if (res) setSettings(res); });
+  };
+
+  useEffect(() => {
+    loadData();
+    const unsubscribe = subscribeCMSUpdate(() => {
+      loadData();
+    });
+    return () => unsubscribe();
   }, []);
 
   return (

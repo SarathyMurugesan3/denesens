@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   Lock, Unlock, ShieldAlert, Plus, Edit, Trash2, LogOut, Check, X,
   Briefcase, Package, Users, Eye, HelpCircle, ExternalLink, RefreshCw,
-  Settings, BarChart3, Star, FolderGit2, Mail, Save, Sparkles, Building2, Phone, MapPin, Globe
+  Settings, BarChart3, Star, FolderGit2, Mail, Save, Sparkles, Building2, Phone, MapPin, Globe, Upload, Image
 } from 'lucide-react';
 import Modal from '../components/Modal';
 import { 
@@ -15,7 +15,7 @@ import {
   fetchPortfolio, createPortfolio, updatePortfolio, deletePortfolio,
   fetchTeam, createTeamMember, updateTeamMember, deleteTeamMember,
   fetchTestimonials, createTestimonial, updateTestimonial, deleteTestimonial,
-  fetchContactSubmissions
+  fetchContactSubmissions, subscribeCMSUpdate
 } from '../services/api';
 
 export const MasterAdmin = () => {
@@ -67,8 +67,8 @@ export const MasterAdmin = () => {
 
   // Modal controls
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState('service'); // 'stat', 'service', 'product', 'portfolio', 'team', 'testimonial'
-  const [modalAction, setModalAction] = useState('create'); // 'create', 'edit'
+  const [modalType, setModalType] = useState('service');
+  const [modalAction, setModalAction] = useState('create');
   const [selectedId, setSelectedId] = useState(null);
 
   // Form states
@@ -76,7 +76,7 @@ export const MasterAdmin = () => {
   const [serviceForm, setServiceForm] = useState({ title: '', slug: '', category: 'Development', shortDesc: '', fullDesc: '', featuresText: '', icon: 'Code', tagsText: '', order: 0 });
   const [productForm, setProductForm] = useState({ name: '', slug: '', tagline: '', description: '', featuresText: '', techStackText: '', status: 'Live', demoUrl: '#', badge: 'Enterprise SaaS', order: 0 });
   const [portfolioForm, setPortfolioForm] = useState({ title: '', slug: '', category: 'AI & Data Science', client: '', description: '', impact: '', tagsText: '', liveUrl: '#', order: 0 });
-  const [teamForm, setTeamForm] = useState({ name: '', role: '', bio: '', initials: '', linkedin: '', twitter: '', github: '', order: 0 });
+  const [teamForm, setTeamForm] = useState({ name: '', role: '', bio: '', initials: '', avatar: '', linkedin: '', twitter: '', github: '', order: 0 });
   const [testimonialForm, setTestimonialForm] = useState({ name: '', role: '', company: '', content: '', rating: 5, order: 0 });
 
   useEffect(() => {
@@ -94,6 +94,16 @@ export const MasterAdmin = () => {
         .finally(() => setLoading(false));
     }
   }, []);
+
+  // Real-time listener for instant CMS updates
+  useEffect(() => {
+    if (isAuthenticated) {
+      const unsubscribe = subscribeCMSUpdate(() => {
+        loadAllData();
+      });
+      return () => unsubscribe();
+    }
+  }, [isAuthenticated]);
 
   const loadAllData = async () => {
     setFetchingData(true);
@@ -166,6 +176,18 @@ export const MasterAdmin = () => {
     }
   };
 
+  // Base64 Image File Reader for Team Profile Uploads
+  const handleAvatarFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setTeamForm(prev => ({ ...prev, avatar: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Open Create Modals
   const openCreateModal = (type) => {
     setModalType(type);
@@ -180,7 +202,7 @@ export const MasterAdmin = () => {
     } else if (type === 'portfolio') {
       setPortfolioForm({ title: '', slug: '', category: 'AI & Data Science', client: '', description: '', impact: '', tagsText: '', liveUrl: '#', order: portfolio.length + 1 });
     } else if (type === 'team') {
-      setTeamForm({ name: '', role: '', bio: '', initials: '', linkedin: '', twitter: '', github: '', order: team.length + 1 });
+      setTeamForm({ name: '', role: '', bio: '', initials: '', avatar: '', linkedin: '', twitter: '', github: '', order: team.length + 1 });
     } else if (type === 'testimonial') {
       setTestimonialForm({ name: '', role: '', company: '', content: '', rating: 5, order: testimonials.length + 1 });
     }
@@ -237,6 +259,7 @@ export const MasterAdmin = () => {
         role: item.role || '',
         bio: item.bio || '',
         initials: item.initials || '',
+        avatar: item.avatar || '',
         linkedin: item.socialLinks?.linkedin || '',
         twitter: item.socialLinks?.twitter || '',
         github: item.socialLinks?.github || '',
@@ -292,6 +315,7 @@ export const MasterAdmin = () => {
           role: teamForm.role,
           bio: teamForm.bio,
           initials: teamForm.initials || teamForm.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(),
+          avatar: teamForm.avatar,
           socialLinks: { linkedin: teamForm.linkedin, twitter: teamForm.twitter, github: teamForm.github },
           order: teamForm.order
         };
@@ -388,10 +412,10 @@ export const MasterAdmin = () => {
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold font-heading text-white">SECRET ADMIN CMS</h1>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-gold-400/20 text-gold-300 border border-gold-400/40">
-                  LIVE CMS CONTROLLER
+                  REAL-TIME INSTANT SYNC ACTIVE
                 </span>
               </div>
-              <p className="text-xs text-gray-400 mt-0.5">Manage every aspect of Denesens Solutions website content in real time.</p>
+              <p className="text-xs text-gray-400 mt-0.5">Any additions, edits, or deletions instantly update the live website without page reload.</p>
             </div>
           </div>
 
@@ -473,7 +497,7 @@ export const MasterAdmin = () => {
             {settingsSavedSuccess && (
               <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-400" />
-                <span>Website settings successfully saved and published!</span>
+                <span>Website settings successfully saved and updated across live website!</span>
               </div>
             )}
 
@@ -793,7 +817,7 @@ export const MasterAdmin = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold font-heading text-white">Executive Team Roster</h2>
-                <p className="text-xs text-gray-400 mt-1">Manage corporate leaders displayed on the About page.</p>
+                <p className="text-xs text-gray-400 mt-1">Manage corporate leaders (CEO, CTO, Marketing Lead) and profile pictures saved directly in MongoDB Atlas.</p>
               </div>
               <button
                 onClick={() => openCreateModal('team')}
@@ -807,10 +831,15 @@ export const MasterAdmin = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {team.map(member => (
                 <div key={member._id} className="p-6 rounded-3xl bg-dark-900 border border-gold-500/20 shadow-xl text-center space-y-4">
-                  <div className="relative w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-300 p-1 shadow-gold-glow">
-                    <div className="w-full h-full rounded-full bg-dark-950 flex items-center justify-center text-gold-300 font-bold text-xl">
-                      {member.initials}
-                    </div>
+                  {/* Round Gold Ring Profile Picture */}
+                  <div className="relative w-24 h-24 mx-auto rounded-full bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-300 p-1 shadow-gold-glow">
+                    {member.avatar ? (
+                      <img src={member.avatar} alt={member.name} className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-dark-950 flex items-center justify-center text-gold-300 font-bold text-2xl">
+                        {member.initials}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-white">{member.name}</h3>
@@ -819,7 +848,7 @@ export const MasterAdmin = () => {
                   <p className="text-xs text-gray-400 italic">"{member.bio}"</p>
                   <div className="pt-4 border-t border-dark-800 flex items-center justify-center gap-3">
                     <button onClick={() => openEditModal('team', member)} className="px-3 py-1.5 rounded-lg bg-dark-800 text-gold-300 hover:text-white text-xs font-semibold flex items-center gap-1">
-                      <Edit className="w-3.5 h-3.5" /> Edit
+                      <Edit className="w-3.5 h-3.5" /> Edit Member
                     </button>
                     <button onClick={() => handleDelete('team', member._id)} className="px-3 py-1.5 rounded-lg bg-red-950/50 text-red-400 hover:text-white text-xs font-semibold flex items-center gap-1">
                       <Trash2 className="w-3.5 h-3.5" /> Delete
@@ -994,7 +1023,7 @@ export const MasterAdmin = () => {
             </>
           )}
 
-          {/* TEAM FORM */}
+          {/* TEAM FORM WITH AVATAR IMAGE FILE UPLOAD AND ATLAS STORE */}
           {modalType === 'team' && (
             <>
               <div>
@@ -1002,11 +1031,45 @@ export const MasterAdmin = () => {
                 <input type="text" required value={teamForm.name} onChange={e=>setTeamForm({...teamForm, name: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Role / Title</label>
+                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Role / Title (e.g. CEO, CTO)</label>
                 <input type="text" required value={teamForm.role} onChange={e=>setTeamForm({...teamForm, role: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
               </div>
+              
+              {/* Profile Picture Upload & Atlas Storage */}
+              <div className="p-4 rounded-xl bg-dark-850 border border-gold-500/30 space-y-3">
+                <label className="block text-xs font-semibold text-gold-300 uppercase">Profile Picture (Stored in MongoDB Atlas)</label>
+                <div className="flex items-center gap-4">
+                  {teamForm.avatar ? (
+                    <img src={teamForm.avatar} alt="Preview" className="w-14 h-14 rounded-full object-cover border-2 border-gold-400 shadow-gold-glow flex-shrink-0" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-full bg-dark-950 border border-gold-500/30 flex items-center justify-center text-gold-300 font-bold text-lg flex-shrink-0">
+                      {teamForm.initials || 'IMG'}
+                    </div>
+                  )}
+                  <div className="space-y-1.5 flex-grow">
+                    <span className="text-[11px] text-gray-400 block">Choose image file from computer (Auto-converts for Atlas storage):</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarFileUpload}
+                      className="text-xs text-gray-300 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-gold-500/20 file:text-gold-300 hover:file:bg-gold-500/30"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[11px] text-gray-400 block mb-1">Or enter direct Image URL:</span>
+                  <input
+                    type="text"
+                    placeholder="https://images.unsplash.com/photo-..."
+                    value={teamForm.avatar}
+                    onChange={e => setTeamForm({ ...teamForm, avatar: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl bg-dark-900 border border-gold-500/20 text-white text-xs"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Bio</label>
+                <label className="block text-xs font-semibold text-gold-300 uppercase mb-1">Bio Description</label>
                 <textarea rows={2} required value={teamForm.bio} onChange={e=>setTeamForm({...teamForm, bio: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-dark-850 border border-gold-500/30 text-white text-sm" />
               </div>
             </>

@@ -2,6 +2,42 @@ import axios from 'axios';
 
 const API_BASE = '/api';
 
+// Live Event Broadcaster for Instant Page Updates without Reload
+const cmsChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('denesens_cms_channel') : null;
+
+export const emitCMSUpdate = (topic = 'general') => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('denesens_cms_update', { detail: { topic, timestamp: Date.now() } }));
+  }
+  if (cmsChannel) {
+    try {
+      cmsChannel.postMessage({ topic, timestamp: Date.now() });
+    } catch (e) {
+      // Ignore broadcast errors
+    }
+  }
+};
+
+export const subscribeCMSUpdate = (callback) => {
+  if (typeof window === 'undefined') return () => {};
+
+  const handleCustomEvent = (e) => callback(e.detail);
+  window.addEventListener('denesens_cms_update', handleCustomEvent);
+
+  let handleMessage = null;
+  if (cmsChannel) {
+    handleMessage = (e) => callback(e.data);
+    cmsChannel.addEventListener('message', handleMessage);
+  }
+
+  return () => {
+    window.removeEventListener('denesens_cms_update', handleCustomEvent);
+    if (cmsChannel && handleMessage) {
+      cmsChannel.removeEventListener('message', handleMessage);
+    }
+  };
+};
+
 export const fetchServices = async () => {
   try {
     const res = await axios.get(`${API_BASE}/services`);
@@ -75,6 +111,7 @@ export const fetchTestimonials = async () => {
 export const submitContactForm = async (formData) => {
   try {
     const res = await axios.post(`${API_BASE}/contact`, formData);
+    emitCMSUpdate('contact');
     return res.data;
   } catch (err) {
     if (err.response && err.response.data) {
@@ -110,102 +147,121 @@ export const verifyAdminPasscode = async (password) => {
 // Site Settings Admin
 export const updateSettings = async (settingsData) => {
   const res = await axios.put(`${API_BASE}/settings`, settingsData, getAdminHeaders());
+  emitCMSUpdate('settings');
   return res.data.data;
 };
 
 // Stats CRUD
 export const createStat = async (statData) => {
   const res = await axios.post(`${API_BASE}/settings/stats`, statData, getAdminHeaders());
+  emitCMSUpdate('stats');
   return res.data.data;
 };
 
 export const updateStat = async (id, statData) => {
   const res = await axios.put(`${API_BASE}/settings/stats/${id}`, statData, getAdminHeaders());
+  emitCMSUpdate('stats');
   return res.data.data;
 };
 
 export const deleteStat = async (id) => {
   const res = await axios.delete(`${API_BASE}/settings/stats/${id}`, getAdminHeaders());
+  emitCMSUpdate('stats');
   return res.data;
 };
 
 // Services CRUD
 export const createService = async (serviceData) => {
   const res = await axios.post(`${API_BASE}/services`, serviceData, getAdminHeaders());
+  emitCMSUpdate('services');
   return res.data.data;
 };
 
 export const updateService = async (id, serviceData) => {
   const res = await axios.put(`${API_BASE}/services/${id}`, serviceData, getAdminHeaders());
+  emitCMSUpdate('services');
   return res.data.data;
 };
 
 export const deleteService = async (id) => {
   const res = await axios.delete(`${API_BASE}/services/${id}`, getAdminHeaders());
+  emitCMSUpdate('services');
   return res.data;
 };
 
 // Products CRUD
 export const createProduct = async (productData) => {
   const res = await axios.post(`${API_BASE}/products`, productData, getAdminHeaders());
+  emitCMSUpdate('products');
   return res.data.data;
 };
 
 export const updateProduct = async (id, productData) => {
   const res = await axios.put(`${API_BASE}/products/${id}`, productData, getAdminHeaders());
+  emitCMSUpdate('products');
   return res.data.data;
 };
 
 export const deleteProduct = async (id) => {
   const res = await axios.delete(`${API_BASE}/products/${id}`, getAdminHeaders());
+  emitCMSUpdate('products');
   return res.data;
 };
 
 // Team CRUD
 export const createTeamMember = async (teamData) => {
   const res = await axios.post(`${API_BASE}/team`, teamData, getAdminHeaders());
+  emitCMSUpdate('team');
   return res.data.data;
 };
 
 export const updateTeamMember = async (id, teamData) => {
   const res = await axios.put(`${API_BASE}/team/${id}`, teamData, getAdminHeaders());
+  emitCMSUpdate('team');
   return res.data.data;
 };
 
 export const deleteTeamMember = async (id) => {
   const res = await axios.delete(`${API_BASE}/team/${id}`, getAdminHeaders());
+  emitCMSUpdate('team');
   return res.data;
 };
 
 // Portfolio CRUD
 export const createPortfolio = async (portfolioData) => {
   const res = await axios.post(`${API_BASE}/portfolio`, portfolioData, getAdminHeaders());
+  emitCMSUpdate('portfolio');
   return res.data.data;
 };
 
 export const updatePortfolio = async (id, portfolioData) => {
   const res = await axios.put(`${API_BASE}/portfolio/${id}`, portfolioData, getAdminHeaders());
+  emitCMSUpdate('portfolio');
   return res.data.data;
 };
 
 export const deletePortfolio = async (id) => {
   const res = await axios.delete(`${API_BASE}/portfolio/${id}`, getAdminHeaders());
+  emitCMSUpdate('portfolio');
   return res.data;
 };
 
 // Testimonials CRUD
 export const createTestimonial = async (testimonialData) => {
   const res = await axios.post(`${API_BASE}/testimonials`, testimonialData, getAdminHeaders());
+  emitCMSUpdate('testimonials');
   return res.data.data;
 };
 
 export const updateTestimonial = async (id, testimonialData) => {
   const res = await axios.put(`${API_BASE}/testimonials/${id}`, testimonialData, getAdminHeaders());
+  emitCMSUpdate('testimonials');
   return res.data.data;
 };
 
 export const deleteTestimonial = async (id) => {
   const res = await axios.delete(`${API_BASE}/testimonials/${id}`, getAdminHeaders());
+  emitCMSUpdate('testimonials');
   return res.data;
 };
 

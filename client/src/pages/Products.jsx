@@ -3,15 +3,23 @@ import { motion } from 'framer-motion';
 import { Cpu, Zap, ArrowRight } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import Modal from '../components/Modal';
-import { fetchProducts } from '../services/api';
+import { fetchProducts, subscribeCMSUpdate } from '../services/api';
 import { Link } from 'react-router-dom';
 
 export const Products = () => {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  useEffect(() => {
+  const loadData = () => {
     fetchProducts().then(res => setProducts(res));
+  };
+
+  useEffect(() => {
+    loadData();
+    const unsubscribe = subscribeCMSUpdate(() => {
+      loadData();
+    });
+    return () => unsubscribe();
   }, []);
 
   return (
