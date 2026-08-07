@@ -87,6 +87,9 @@ export const applyThemeToDOM = (settings) => {
     root.style.removeProperty('--theme-font-heading');
     root.style.removeProperty('--theme-font-body');
     root.style.removeProperty('--font-scale');
+    root.style.removeProperty('--gradient-start');
+    root.style.removeProperty('--gradient-mid');
+    root.style.removeProperty('--gradient-end');
 
     root.setAttribute('data-theme-bg', 'white');
     root.setAttribute('data-font', 'outfit');
@@ -111,6 +114,9 @@ export const applyThemeToDOM = (settings) => {
     root.style.setProperty('--accent-dark', settings.customAccentColor);
   }
   if (settings.customBorderColor) root.style.setProperty('--theme-border', settings.customBorderColor);
+  if (settings.customGradientStart) root.style.setProperty('--gradient-start', settings.customGradientStart);
+  if (settings.customGradientMid) root.style.setProperty('--gradient-mid', settings.customGradientMid);
+  if (settings.customGradientEnd) root.style.setProperty('--gradient-end', settings.customGradientEnd);
 
   // Font Size Scale
   const fontScaleMap = {

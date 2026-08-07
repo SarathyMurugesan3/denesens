@@ -58,6 +58,9 @@ export const MasterAdmin = () => {
     customSubtextColor: '#475569',
     customAccentColor: '#D4AF37',
     customBorderColor: '#E2E8F0',
+    customGradientStart: '#F8FAFC',
+    customGradientMid: '#D4AF37',
+    customGradientEnd: '#B8860B',
     headingFont: 'Outfit',
     bodyFont: 'Inter',
     fontSizeScale: 'normal',
@@ -667,6 +670,9 @@ export const MasterAdmin = () => {
                         customSubtextColor: '#475569',
                         customAccentColor: '#D4AF37',
                         customBorderColor: '#E2E8F0',
+                        customGradientStart: '#F8FAFC',
+                        customGradientMid: '#D4AF37',
+                        customGradientEnd: '#B8860B',
                         headingFont: 'Outfit',
                         bodyFont: 'Inter',
                         fontSizeScale: 'normal'
@@ -731,7 +737,7 @@ export const MasterAdmin = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          const p = { ...settings, themeBg: 'white', customBgColor: '#FFFFFF', customCardColor: '#F8FAFC', customTextColor: '#0F172A', customSubtextColor: '#475569', customAccentColor: '#D4AF37', customBorderColor: '#E2E8F0' };
+                          const p = { ...settings, themeBg: 'white', customBgColor: '#FFFFFF', customCardColor: '#F8FAFC', customTextColor: '#0F172A', customSubtextColor: '#475569', customAccentColor: '#D4AF37', customBorderColor: '#E2E8F0', customGradientStart: '#F8FAFC', customGradientMid: '#D4AF37', customGradientEnd: '#B8860B' };
                           setSettings(p); applyThemeToDOM(p);
                         }}
                         className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-[10px] font-bold text-slate-800 shadow-sm"
@@ -741,7 +747,7 @@ export const MasterAdmin = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          const p = { ...settings, themeBg: 'slate', customBgColor: '#F1F5F9', customCardColor: '#FFFFFF', customTextColor: '#0F172A', customSubtextColor: '#334155', customAccentColor: '#2563EB', customBorderColor: '#CBD5E1' };
+                          const p = { ...settings, themeBg: 'slate', customBgColor: '#F1F5F9', customCardColor: '#FFFFFF', customTextColor: '#0F172A', customSubtextColor: '#334155', customAccentColor: '#2563EB', customBorderColor: '#CBD5E1', customGradientStart: '#FFFFFF', customGradientMid: '#3B82F6', customGradientEnd: '#1D4ED8' };
                           setSettings(p); applyThemeToDOM(p);
                         }}
                         className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-300 text-[10px] font-bold text-blue-700 shadow-sm"
@@ -751,7 +757,7 @@ export const MasterAdmin = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          const p = { ...settings, themeBg: 'pearl', customBgColor: '#FAF9F6', customCardColor: '#FFFFFF', customTextColor: '#1C1917', customSubtextColor: '#44403C', customAccentColor: '#D97706', customBorderColor: '#E7E5E4' };
+                          const p = { ...settings, themeBg: 'pearl', customBgColor: '#FAF9F6', customCardColor: '#FFFFFF', customTextColor: '#1C1917', customSubtextColor: '#44403C', customAccentColor: '#D97706', customBorderColor: '#E7E5E4', customGradientStart: '#FFFFFF', customGradientMid: '#F59E0B', customGradientEnd: '#B45309' };
                           setSettings(p); applyThemeToDOM(p);
                         }}
                         className="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-300 text-[10px] font-bold text-amber-800 shadow-sm"
@@ -761,7 +767,7 @@ export const MasterAdmin = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          const p = { ...settings, themeBg: 'obsidian', customBgColor: '#0A0E17', customCardColor: '#111827', customTextColor: '#F8FAFC', customSubtextColor: '#94A3B8', customAccentColor: '#D4AF37', customBorderColor: '#374151' };
+                          const p = { ...settings, themeBg: 'obsidian', customBgColor: '#0A0E17', customCardColor: '#111827', customTextColor: '#F8FAFC', customSubtextColor: '#94A3B8', customAccentColor: '#D4AF37', customBorderColor: '#374151', customGradientStart: '#111827', customGradientMid: '#D4AF37', customGradientEnd: '#B8860B' };
                           setSettings(p); applyThemeToDOM(p);
                         }}
                         className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-[10px] font-bold text-gold-400 shadow-sm"
@@ -897,8 +903,7 @@ export const MasterAdmin = () => {
                       </div>
                     </div>
 
-                    {/* Card Border Color */}
-                    <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                                     <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
                       <label className="block text-[11px] font-bold text-slate-700 uppercase">Card Borders & Dividers</label>
                       <div className="flex items-center gap-2">
                         <input
@@ -915,6 +920,81 @@ export const MasterAdmin = () => {
                           value={settings.customBorderColor || '#E2E8F0'}
                           onChange={(e) => {
                             const updated = { ...settings, customBorderColor: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Gradient Start Color */}
+                    <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase">Gradient Start</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.customGradientStart || '#F8FAFC'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customGradientStart: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-9 h-9 rounded-lg border border-slate-300 cursor-pointer p-0.5"
+                        />
+                        <input
+                          type="text"
+                          value={settings.customGradientStart || '#F8FAFC'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customGradientStart: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Gradient Middle Color */}
+                    <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase">Gradient Middle</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.customGradientMid || '#D4AF37'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customGradientMid: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-9 h-9 rounded-lg border border-slate-300 cursor-pointer p-0.5"
+                        />
+                        <input
+                          type="text"
+                          value={settings.customGradientMid || '#D4AF37'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customGradientMid: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Gradient End Color */}
+                    <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase">Gradient End</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={settings.customGradientEnd || '#B8860B'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customGradientEnd: e.target.value };
+                            setSettings(updated); applyThemeToDOM(updated);
+                          }}
+                          className="w-9 h-9 rounded-lg border border-slate-300 cursor-pointer p-0.5"
+                        />
+                        <input
+                          type="text"
+                          value={settings.customGradientEnd || '#B8860B'}
+                          onChange={(e) => {
+                            const updated = { ...settings, customGradientEnd: e.target.value };
                             setSettings(updated); applyThemeToDOM(updated);
                           }}
                           className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono font-bold"

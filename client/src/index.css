@@ -123,7 +123,7 @@
 
 /* Luxury Text Utility */
 .gold-text {
-  background: linear-gradient(135deg, var(--theme-text-main, #0F172A) 0%, var(--accent-dark, #B8860B) 40%, var(--accent-main, #D4AF37) 80%);
+  background: linear-gradient(135deg, var(--gradient-start, var(--theme-text-main, #0F172A)) 0%, var(--gradient-mid, var(--accent-dark, #B8860B)) 40%, var(--gradient-end, var(--accent-main, #D4AF37)) 80%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -190,7 +190,7 @@ body:not(.secret-admin-body) .text-gold-600 {
 }
 
 body:not(.secret-admin-body) .bg-gold-gradient {
-  background: linear-gradient(135deg, var(--theme-bg-card, #F8FAFC) 0%, var(--accent-main, #D4AF37) 50%, var(--accent-dark, #B8860B) 100%) !important;
+  background: linear-gradient(135deg, var(--gradient-start, var(--theme-bg-card, #F8FAFC)) 0%, var(--gradient-mid, var(--accent-main, #D4AF37)) 50%, var(--gradient-end, var(--accent-dark, #B8860B)) 100%) !important;
   color: #0F172A !important;
 }
 
