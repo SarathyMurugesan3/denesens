@@ -24,9 +24,26 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // OPTIONS requests should bypass auth headers
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        String method = request.getMethod();
+        String path = request.getRequestURI();
+
+        // OPTIONS requests bypass auth
+        if ("OPTIONS".equalsIgnoreCase(method)) {
             return true;
+        }
+
+        // Public GET endpoints bypass auth
+        if ("GET".equalsIgnoreCase(method)) {
+            if (!path.startsWith("/api/admin") && !path.startsWith("/api/contact")) {
+                return true;
+            }
+        }
+
+        // Public POST endpoints bypass auth
+        if ("POST".equalsIgnoreCase(method)) {
+            if (path.startsWith("/api/contact") || path.equals("/api/admin/verify")) {
+                return true;
+            }
         }
 
         String requestSecret = request.getHeader("x-admin-secret");
