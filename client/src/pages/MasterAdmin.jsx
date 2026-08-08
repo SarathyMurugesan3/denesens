@@ -144,6 +144,32 @@ export const MasterAdmin = () => {
     }
   }, [isAuthenticated]);
 
+  // Keybinding: Ctrl + S / Cmd + S to Quick Save settings
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        if (isAuthenticated && activeTab === 'settings') {
+          e.preventDefault();
+          setSavingSettings(true);
+          setSettingsSavedSuccess(false);
+          updateSettings(settings)
+            .then(() => {
+              setSettingsSavedSuccess(true);
+              setTimeout(() => setSettingsSavedSuccess(false), 3000);
+            })
+            .catch((err) => {
+              alert('Failed to save settings: ' + (err.message || 'Error occurred'));
+            })
+            .finally(() => {
+              setSavingSettings(false);
+            });
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isAuthenticated, activeTab, settings]);
+
   const loadAllData = async () => {
     setFetchingData(true);
     try {
@@ -1868,6 +1894,21 @@ export const MasterAdmin = () => {
           </div>
         </form>
       </Modal>
+      
+      {/* Floating Quick Save Button */}
+      {activeTab === 'settings' && (
+        <button
+          onClick={handleSaveSettings}
+          disabled={savingSettings}
+          className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-gold-gradient hover:bg-gold-gradient-hover text-slate-950 shadow-luxury hover:scale-110 active:scale-95 transition-all flex items-center gap-2 font-bold uppercase tracking-widest text-xs group"
+          title="Quick Save (Ctrl+S)"
+        >
+          <Save className="w-5 h-5" />
+          <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-out whitespace-nowrap">
+            {savingSettings ? 'Saving...' : 'Quick Save'}
+          </span>
+        </button>
+      )}
 
     </div>
   );
