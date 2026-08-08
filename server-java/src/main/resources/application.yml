@@ -1,0 +1,23 @@
+server:
+  port: ${PORT:5000}
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://127.0.0.1:27017/denesens_db}
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER}
+    password: ${SMTP_PASS}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  admin-secret: ${ADMIN_SECRET:denesens-secret-admin}
+  client-url: ${CLIENT_URL:http://localhost:5173}
+  notification-email: ${NOTIFICATION_EMAIL:info@denesens.com}

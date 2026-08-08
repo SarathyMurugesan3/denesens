@@ -20,3 +20,16 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Java / Maven Build outputs
+**/target/
+.mvn/
+*.jar
+*.war
+*.ear
+*.class
+.factorypath
+.project
+.classpath
+.settings/
+
