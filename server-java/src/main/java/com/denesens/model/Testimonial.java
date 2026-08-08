@@ -1,5 +1,6 @@
 package com.denesens.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -12,6 +13,7 @@ import java.time.Instant;
 @Document(collection = "testimonials")
 public class Testimonial {
     @Id
+    @JsonProperty("_id")
     private String id;
     
     private String name;
