@@ -21,4 +21,4 @@ FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 COPY --from=server-build /server/target/*.jar app.jar
 EXPOSE 5000
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Djava.naming.provider.url=dns://8.8.8.8", "-jar", "app.jar"]
